@@ -7,6 +7,8 @@
 
 ## 项目启动
 由于还未上线，只能本地运行，download项目文件之后在当前文件夹执行\
-**npm install**\
-**npm start**
+`npm instal`\
+`npm start`
+
+
 
