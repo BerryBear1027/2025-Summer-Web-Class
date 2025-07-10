@@ -1,127 +1,341 @@
-import React, { useState } from 'react';
-import './Auth.css';
+import React, { useState, useEffect } from 'react';
 import { authAPI, tokenManager } from '../api/auth';
+import './UserProfile.css';
 
-const UserProfile = ({ user, onLogout, onUserUpdate }) => {
-    const [uploading, setUploading] = useState(false);
-    const [error, setError] = useState('');
+const UserProfile = ({ user: initialUser, onLogout, onUserUpdate, onBack }) => {
+  const [user, setUser] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [formData, setFormData] = useState({
+    username: '',
+    email: '',
+    phone: '',
+    bio: '',
+    birthdate: '',
+    gender: ''
+  });
 
-    const handleAvatarUpload = async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
+  useEffect(() => {
+    fetchUserData();
+  }, []);
 
-        // 验证文件类型
-        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-        if (!allowedTypes.includes(file.type)) {
-            setError('只允许上传 JPG、PNG、GIF 格式的图片');
-            return;
-        }
+  const fetchUserData = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      const userData = await authAPI.getProfile();
+      if (userData.success) {
+        setUser(userData.data);
+        setFormData({
+          username: userData.data.username || '',
+          email: userData.data.email || '',
+          phone: userData.data.phone || '',
+          bio: userData.data.bio || '',
+          birthdate: userData.data.birthdate || '',
+          gender: userData.data.gender || ''
+        });
+      } else {
+        setError(userData.message || '获取用户信息失败');
+      }
+    } catch (error) {
+      console.error('获取用户信息失败:', error);
+      setError('获取用户信息失败，请重试');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        // 验证文件大小 (5MB)
-        if (file.size > 5 * 1024 * 1024) {
-            setError('文件大小不能超过5MB');
-            return;
-        }
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
 
-        setUploading(true);
-        setError('');
+  const handleSave = async () => {
+    try {
+      setError('');
+      setSuccessMessage('');
+      const result = await authAPI.updateProfile(formData);
+      if (result.success) {
+        setUser({ ...user, ...formData });
+        setIsEditing(false);
+        setSuccessMessage('个人信息更新成功');
+        setTimeout(() => setSuccessMessage(''), 3000);
+      } else {
+        setError(result.message || '更新失败');
+      }
+    } catch (error) {
+      console.error('更新用户信息失败:', error);
+      setError('更新失败，请重试');
+    }
+  };
 
-        try {
-            const response = await authAPI.uploadAvatar(file);
+  const handleCancel = () => {
+    if (user) {
+      setFormData({
+        username: user.username || '',
+        email: user.email || '',
+        phone: user.phone || '',
+        bio: user.bio || '',
+        birthdate: user.birthdate || '',
+        gender: user.gender || ''
+      });
+    }
+    setIsEditing(false);
+    setError('');
+    setSuccessMessage('');
+  };
 
-            if (response.success) {
-                onUserUpdate(response.data);
-                alert('头像上传成功！');
-            } else {
-                setError(response.message || '头像上传失败');
-            }
-        } catch (error) {
-            console.error('头像上传错误：', error);
-            setError('网络错误，请稍后重试');
-        } finally {
-            setUploading(false);
-        }
-    };
+  const handleAvatarUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
 
-    const handleLogout = () => {
-        if (window.confirm('确定要退出登录吗？')) {
-            onLogout();
-        }
-    };
+    if (file.size > 5 * 1024 * 1024) {
+      setError('头像文件大小不能超过5MB');
+      return;
+    }
 
+    if (!file.type.startsWith('image/')) {
+      setError('请选择图片文件');
+      return;
+    }
+
+    try {
+      setError('');
+      const result = await authAPI.uploadAvatar(file);
+      if (result.success) {
+        setUser({ ...user, avatar: result.data.avatar });
+        setSuccessMessage('头像更新成功');
+        setTimeout(() => setSuccessMessage(''), 3000);
+      } else {
+        setError(result.message || '头像上传失败');
+      }
+    } catch (error) {
+      console.error('上传头像失败:', error);
+      setError('头像上传失败，请重试');
+    }
+  };
+
+  if (loading) {
     return (
-        <div className="auth-container">
-            <div className="auth-card profile-card">
-                <h2 className="auth-title">个人信息</h2>
-
-                {error && <div className="error-message">{error}</div>}
-
-                <div className="profile-content">
-                    <div className="avatar-section">
-                        <div className="avatar-container">
-                            {user.avatar ? (
-                                <img
-                                    src={`http://localhost:7001${user.avatar}`}
-                                    alt="用户头像"
-                                    className="avatar-image"
-                                />
-                            ) : (
-                                <div className="avatar-placeholder">
-                                    <span>头像</span>
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="avatar-upload">
-                            <input
-                                type="file"
-                                id="avatar-upload"
-                                accept="image/*"
-                                onChange={handleAvatarUpload}
-                                disabled={uploading}
-                                style={{ display: 'none' }}
-                            />
-                            <label htmlFor="avatar-upload" className="upload-button">
-                                {uploading ? '上传中...' : '更换头像'}
-                            </label>
-                        </div>
-                    </div>
-
-                    <div className="user-info">
-                        <div className="info-item">
-                            <label>用户名：</label>
-                            <span>{user.username}</span>
-                        </div>
-
-                        {user.email && (
-                            <div className="info-item">
-                                <label>邮箱：</label>
-                                <span>{user.email}</span>
-                            </div>
-                        )}
-
-                        {user.phone && (
-                            <div className="info-item">
-                                <label>手机号：</label>
-                                <span>{user.phone}</span>
-                            </div>
-                        )}
-
-                        <div className="info-item">
-                            <label>注册时间：</label>
-                            <span>{new Date(user.createdAt).toLocaleDateString()}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="profile-actions">
-                    <button onClick={handleLogout} className="logout-button">
-                        退出登录
-                    </button>
-                </div>
-            </div>
+      <div className="profile-container">
+        <div className="profile-loading">
+          <div className="loading-spinner"></div>
+          <p>加载中...</p>
         </div>
+      </div>
     );
+  }
+
+  if (!user) {
+    return (
+      <div className="profile-container">
+        <div className="profile-error">
+          <p>无法加载用户信息</p>
+          <button onClick={fetchUserData} className="retry-button">
+            重试
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="profile-container">
+      <div className="profile-header">
+        <div className="header-left">
+          <button onClick={onBack} className="back-button">
+            ← 返回主页
+          </button>
+          <h1>个人资料</h1>
+        </div>
+        {!isEditing && (
+          <button 
+            onClick={() => setIsEditing(true)} 
+            className="edit-button"
+          >
+            编辑资料
+          </button>
+        )}
+      </div>
+
+      {error && (
+        <div className="alert alert-error">
+          {error}
+        </div>
+      )}
+
+      {successMessage && (
+        <div className="alert alert-success">
+          {successMessage}
+        </div>
+      )}
+
+      <div className="profile-content">
+        <div className="profile-sidebar">
+          <div className="avatar-section">
+            <div className="avatar-container">
+              <img 
+                src={user.avatar || '/default-avatar.png'} 
+                alt="用户头像" 
+                className="avatar-image"
+              />
+              <label htmlFor="avatar-upload" className="avatar-upload-label">
+                更换头像
+              </label>
+              <input
+                id="avatar-upload"
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarUpload}
+                className="avatar-upload-input"
+              />
+            </div>
+          </div>
+
+          <div className="user-stats">
+            <div className="stat-item">
+              <span className="stat-label">注册时间</span>
+              <span className="stat-value">
+                {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '未知'}
+              </span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-label">用户ID</span>
+              <span className="stat-value">{user.id}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="profile-main">
+          <div className="form-section">
+            <h2>基本信息</h2>
+            
+            <div className="form-group">
+              <label htmlFor="username">用户名</label>
+              {isEditing ? (
+                <input
+                  type="text"
+                  id="username"
+                  name="username"
+                  value={formData.username}
+                  onChange={handleInputChange}
+                  placeholder="请输入用户名"
+                />
+              ) : (
+                <div className="form-value">{user.username || '未设置'}</div>
+              )}
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="email">邮箱</label>
+              {isEditing ? (
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  placeholder="请输入邮箱"
+                />
+              ) : (
+                <div className="form-value">{user.email || '未设置'}</div>
+              )}
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="phone">手机号</label>
+              {isEditing ? (
+                <input
+                  type="tel"
+                  id="phone"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleInputChange}
+                  placeholder="请输入手机号"
+                />
+              ) : (
+                <div className="form-value">{user.phone || '未设置'}</div>
+              )}
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="birthdate">生日</label>
+              {isEditing ? (
+                <input
+                  type="date"
+                  id="birthdate"
+                  name="birthdate"
+                  value={formData.birthdate}
+                  onChange={handleInputChange}
+                />
+              ) : (
+                <div className="form-value">
+                  {user.birthdate ? new Date(user.birthdate).toLocaleDateString() : '未设置'}
+                </div>
+              )}
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="gender">性别</label>
+              {isEditing ? (
+                <select
+                  id="gender"
+                  name="gender"
+                  value={formData.gender}
+                  onChange={handleInputChange}
+                >
+                  <option value="">请选择</option>
+                  <option value="male">男</option>
+                  <option value="female">女</option>
+                  <option value="other">其他</option>
+                </select>
+              ) : (
+                <div className="form-value">
+                  {user.gender === 'male' ? '男' : 
+                   user.gender === 'female' ? '女' : 
+                   user.gender === 'other' ? '其他' : '未设置'}
+                </div>
+              )}
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="bio">个人简介</label>
+              {isEditing ? (
+                <textarea
+                  id="bio"
+                  name="bio"
+                  value={formData.bio}
+                  onChange={handleInputChange}
+                  placeholder="请输入个人简介"
+                  rows="4"
+                />
+              ) : (
+                <div className="form-value bio-value">
+                  {user.bio || '未设置'}
+                </div>
+              )}
+            </div>
+
+            {isEditing && (
+              <div className="form-actions">
+                <button onClick={handleSave} className="save-button">
+                  保存更改
+                </button>
+                <button onClick={handleCancel} className="cancel-button">
+                  取消
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default UserProfile;

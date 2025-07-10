@@ -1,4 +1,4 @@
-/* App.css - 主应用样式 */
+/* App.css - GitHub Style Desktop Layout - 白色主题 */
 
 /* 重置默认样式 */
 * {
@@ -11,35 +11,47 @@ html,
 body {
   width: 100%;
   height: 100%;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #24292f;
+  background-color: #ffffff;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
 #root {
   width: 100%;
   height: 100vh;
-  overflow: hidden;
+  background-color: #ffffff;
 }
 
 .App {
   width: 100%;
   height: 100vh;
+  background-color: #ffffff;
+  color: #24292f;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  background-attachment: fixed;
-  position: relative;
+  flex-direction: column;
 }
 
-/* 桌面端适配 */
-@media (min-width: 768px) {
-  .App {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  }
+/* 全屏容器样式 */
+.app-container {
+  width: 100%;
+  height: 100vh;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* 主内容区域 */
+.main-content {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
 }
 
 /* 加载状态样式 */
@@ -50,17 +62,17 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background-color: #ffffff;
+  color: #24292f;
 }
 
 .loading-spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid rgba(255, 255, 255, 0.3);
+  width: 32px;
+  height: 32px;
+  border: 2px solid #d0d7de;
   border-radius: 50%;
-  border-top-color: white;
-  animation: spin 1s ease-in-out infinite;
+  border-top-color: #0969da;
+  animation: spin 1s linear infinite;
   margin-bottom: 16px;
 }
 
@@ -72,6 +84,66 @@ body {
 
 .loading-container p {
   margin: 0;
-  font-size: 16px;
+  font-size: 14px;
+  font-weight: 400;
+  color: #656d76;
+}
+
+/* 登录注册页面居中布局 */
+.auth-container {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+}
+
+/* 全局按钮样式 */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  font-size: 14px;
   font-weight: 500;
+  line-height: 1.5;
+  border: 1px solid;
+  border-radius: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  color: #ffffff;
+  background-color: #238636;
+  border-color: #238636;
+}
+
+.btn-primary:hover {
+  background-color: #2ea043;
+  border-color: #2ea043;
+}
+
+.btn-secondary {
+  color: #24292f;
+  background-color: #f6f8fa;
+  border-color: #d0d7de;
+}
+
+.btn-secondary:hover {
+  background-color: #eaeef2;
+  border-color: #afb8c1;
+}
+
+.btn-danger {
+  color: #ffffff;
+  background-color: #da3633;
+  border-color: #da3633;
+}
+
+.btn-danger:hover {
+  background-color: #e5534b;
+  border-color: #e5534b;
 }

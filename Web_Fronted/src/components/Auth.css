@@ -1,4 +1,4 @@
-/* Auth.css - 认证相关组件样式 (桌面端优化) */
+/* Auth.css - 深蓝白主题认证组件 */
 
 .auth-container {
     width: 100%;
@@ -6,234 +6,167 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: transparent;
-    /* 移除背景，使用App.css的背景 */
-    padding: 20px;
-    position: relative;
+    background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #ffffff 100%);
+    padding: 24px;
 }
 
 .auth-card {
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    padding: 50px;
-    width: 100%;
-    max-width: 500px;
-    /* 桌面端加宽 */
-    position: relative;
-    overflow: hidden;
+    background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-/* 桌面端特殊样式 */
-@media (min-width: 1024px) {
-    .auth-card {
-        max-width: 600px;
-        padding: 60px;
-    }
-}
-
-.auth-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    border: 1px solid rgba(30, 58, 138, 0.2);
+    border-radius: 12px;
+    padding: 40px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 20px 40px rgba(30, 58, 138, 0.15);
 }
 
 .auth-title {
     text-align: center;
-    margin-bottom: 40px;
-    color: #333;
-    font-size: 32px;
-    font-weight: 700;
+    margin-bottom: 32px;
+    color: #1e3a8a;
+    font-size: 28px;
+    font-weight: 600;
     letter-spacing: -0.5px;
-}
-
-.auth-header {
-    text-align: center;
-    margin-bottom: 30px;
-}
-
-.auth-header h2 {
-    color: #333;
-    margin: 0 0 8px 0;
-    font-size: 32px;
-    font-weight: 700;
-    letter-spacing: -0.5px;
-}
-
-.auth-header p {
-    color: #666;
-    margin: 0;
-    font-size: 16px;
 }
 
 .auth-form {
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 16px;
 }
 
 .form-group {
     display: flex;
     flex-direction: column;
+    gap: 8px;
 }
 
-.form-group label {
-    color: #333;
+.form-label {
+    color: #1e3a8a;
+    font-size: 14px;
     font-weight: 600;
-    margin-bottom: 10px;
-    font-size: 15px;
 }
 
-.form-group input {
-    padding: 16px 20px;
-    border: 2px solid #e1e5e9;
-    border-radius: 10px;
-    font-size: 16px;
-    transition: all 0.3s ease;
-    background: #f8f9fa;
-    height: 52px;
-}
-
-.form-group input:focus {
+.form-input {
+    padding: 12px 16px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 14px;
+    background-color: #ffffff;
+    color: #1f2937;
     outline: none;
-    border-color: #667eea;
-    background: white;
-    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    transition: all 0.3s ease;
+}
+
+.form-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     transform: translateY(-1px);
 }
 
-.form-group input::placeholder {
-    color: #adb5bd;
+.form-input::placeholder {
+    color: #9ca3af;
 }
 
-.auth-button {
-    padding: 18px 24px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+.submit-btn {
+    background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+    color: #ffffff;
     border: none;
-    border-radius: 10px;
-    font-size: 17px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    margin-top: 15px;
-    height: 56px;
-    letter-spacing: 0.5px;
+    margin-top: 8px;
+    box-shadow: 0 4px 12px rgba(30, 58, 138, 0.3);
 }
 
-.auth-button:hover:not(:disabled) {
+.submit-btn:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 6px 16px rgba(30, 58, 138, 0.4);
 }
 
-.auth-button:disabled {
+.submit-btn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
     transform: none;
     box-shadow: none;
 }
 
-.auth-footer {
+.auth-switch {
     text-align: center;
     margin-top: 24px;
     padding-top: 24px;
-    border-top: 1px solid #e9ecef;
+    border-top: 1px solid rgba(30, 58, 138, 0.2);
 }
 
-.auth-footer p {
-    color: #666;
-    margin: 0;
+.auth-switch p {
+    color: #64748b;
+    font-size: 14px;
+    margin-bottom: 8px;
 }
 
-.link-button {
+.switch-btn {
     background: none;
     border: none;
-    color: #667eea;
+    color: #3b82f6;
+    font-size: 14px;
+    font-weight: 600;
     cursor: pointer;
-    font-weight: 500;
-    text-decoration: underline;
-    margin-left: 4px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    padding: 4px 8px;
+    border-radius: 4px;
 }
 
-.link-button:hover {
-    color: #764ba2;
+.switch-btn:hover {
+    color: #1e3a8a;
+    background-color: rgba(59, 130, 246, 0.1);
 }
 
 .error-message {
-    background: #fee;
-    color: #c53030;
-    padding: 12px 16px;
-    border-radius: 6px;
-    border: 1px solid #feb2b2;
-    font-size: 14px;
-    margin-bottom: 10px;
+  background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+  color: #ffffff;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
 }
 
-/* 用户信息页面特殊样式 - 桌面端优化 */
-.profile-content {
-    display: flex;
-    flex-direction: column;
-    gap: 40px;
-    align-items: center;
+.success-message {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  color: #ffffff;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
 }
 
-/* 桌面端布局优化 */
-@media (min-width: 768px) {
-    .profile-content {
-        flex-direction: row;
-        gap: 60px;
-        align-items: flex-start;
-        justify-content: space-between;
-    }
-
-    .avatar-section {
-        flex: 0 0 auto;
-    }
-
-    .user-info {
-        flex: 1;
-        min-width: 0;
-    }
-}
-
-.avatar-section {
+.avatar-upload-section {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 20px;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding: 20px;
+    border: 2px dashed rgba(59, 130, 246, 0.3);
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(255, 255, 255, 0.8) 100%);
 }
 
-.avatar-container {
-    position: relative;
-    width: 150px;
-    height: 150px;
+.avatar-preview {
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
     overflow: hidden;
-    cursor: pointer;
-    border: 5px solid #e9ecef;
-    transition: all 0.3s ease;
-    background: #f8f9fa;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    border: 3px solid #3b82f6;
 }
 
-.avatar-container:hover {
-    border-color: #667eea;
-    transform: translateY(-2px);
-    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
-}
-
-.avatar-container:hover {
-    border-color: #667eea;
-    transform: scale(1.05);
-}
-
-.avatar-image {
+.avatar-preview img {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -242,95 +175,33 @@
 .avatar-placeholder {
     width: 100%;
     height: 100%;
+    background: linear-gradient(135deg, #3b82f6 0%, #1e3a8a 100%);
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    font-size: 14px;
-    text-align: center;
-    flex-direction: column;
-}
-
-.avatar-loading {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.7);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 14px;
-}
-
-.user-info {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-.info-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 0;
-    border-bottom: 1px solid #f1f3f4;
-}
-
-.info-item:last-child {
-    border-bottom: none;
-}
-
-.info-item label {
+    color: #ffffff;
+    font-size: 12px;
     font-weight: 600;
-    color: #495057;
-    min-width: 80px;
 }
 
-.info-item span {
-    color: #6c757d;
-    flex: 1;
-    text-align: right;
+.upload-btn {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    color: #1e3a8a;
+    border: 2px solid #3b82f6;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
 }
 
-.logout-button {
-    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-    margin-top: 20px;
+.upload-btn:hover {
+    background: linear-gradient(135deg, #3b82f6 0%, #1e3a8a 100%);
+    color: #ffffff;
+    transform: translateY(-1px);
 }
 
-.logout-button:hover:not(:disabled) {
-    box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
-}
-
-/* 响应式设计 */
-@media (max-width: 480px) {
-    .auth-container {
-        padding: 10px;
-    }
-
-    .auth-card {
-        padding: 30px 20px;
-    }
-
-    .auth-header h2 {
-        font-size: 24px;
-    }
-
-    .avatar-container {
-        width: 100px;
-        height: 100px;
-    }
-
-    .info-item {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 4px;
-    }
-
-    .info-item span {
-        text-align: left;
-    }
+.file-input {
+    display: none;
 }

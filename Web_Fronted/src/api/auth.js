@@ -22,6 +22,16 @@ export const authAPI = {
         });
     },
 
+    // 更新用户资料
+    updateProfile: (userData) => {
+        const token = localStorage.getItem('token');
+        return api.put('/auth/profile', userData, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+    },
+
     // 上传头像
     uploadAvatar: (file) => {
         const token = localStorage.getItem('token');
