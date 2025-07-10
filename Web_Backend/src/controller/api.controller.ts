@@ -124,4 +124,40 @@ export class APIController {
       };
     }
   }
+
+  // 调试：查看当前存储的所有用户
+  @Get('/debug/users')
+  async getDebugUsers() {
+    const users = await this.userService.getAllUsers();
+    return {
+      success: true,
+      message: 'Debug: All users',
+      data: {
+        count: users.length,
+        users: users
+      }
+    };
+  }
+
+  // 测试：多用户同时在线状态
+  @Get('/debug/online-users')
+  async getOnlineUsers() {
+    const users = await this.userService.getAllUsers();
+    return {
+      success: true,
+      message: 'Current registered users (can all login simultaneously)',
+      data: {
+        totalUsers: users.length,
+        users: users.map(user => ({
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          phone: user.phone,
+          hasAvatar: !!user.avatar,
+          createdAt: user.createdAt
+        })),
+        note: 'Each user can login and get their own JWT token for concurrent access'
+      }
+    };
+  }
 }

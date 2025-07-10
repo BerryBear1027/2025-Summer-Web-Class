@@ -3,6 +3,7 @@ import * as koa from '@midwayjs/koa';
 import * as validate from '@midwayjs/validate';
 import * as info from '@midwayjs/info';
 import * as crossDomain from '@midwayjs/cross-domain';
+import * as upload from '@midwayjs/upload';
 import { join } from 'path';
 // import { DefaultErrorFilter } from './filter/default.filter';
 // import { NotFoundFilter } from './filter/notfound.filter';
@@ -13,6 +14,7 @@ import { ReportMiddleware } from './middleware/report.middleware';
     koa,
     validate,
     crossDomain,
+    upload,
     {
       component: info,
       enabledEnvironment: ['local'],
