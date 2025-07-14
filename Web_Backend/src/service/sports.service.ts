@@ -351,6 +351,32 @@ export class SportsService {
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
 
+  // 删除评论
+  async deleteComment(commentId: string, userId: string): Promise<{ success: boolean; message: string }> {
+    try {
+      const comment = this.comments.get(commentId);
+      if (!comment) {
+        return { success: false, message: '评论不存在' };
+      }
+
+      if (comment.userId !== userId) {
+        return { success: false, message: '只能删除自己的评论' };
+      }
+
+      this.comments.delete(commentId);
+
+      return {
+        success: true,
+        message: '评论已删除'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: '删除评论失败：' + error.message
+      };
+    }
+  }
+
   // ============ 搜索功能 ============
 
   // 搜索活动

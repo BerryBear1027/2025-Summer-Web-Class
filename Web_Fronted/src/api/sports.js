@@ -145,6 +145,16 @@ export const sportsAPI = {
     return api.get(`/sports/comments?targetId=${targetId}&targetType=${targetType}`);
   },
 
+  // 删除评论
+  deleteComment: (commentId) => {
+    const token = localStorage.getItem('token');
+    return api.delete(`/sports/comments/${commentId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+  },
+
   // ============ 用户历史记录 ============
 
   // 获取用户参与的活动

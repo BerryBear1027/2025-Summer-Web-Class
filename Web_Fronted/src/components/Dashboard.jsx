@@ -332,7 +332,10 @@ const Dashboard = ({ user, onNavigate, onLogout }) => {
                   </div>
                 ) : (
                   activities.map((activity) => (
-                    <div key={activity.id} className="item-card activity-card" onClick={() => onNavigate('activity-detail', activity)}>
+                    <div key={activity.id} className="item-card activity-card" onClick={() => {
+                      console.log('Clicking activity:', activity);
+                      onNavigate('activity-detail', activity);
+                    }}>
                       <div className="card-content">
                         <div className="item-header">
                           <div className="item-title">

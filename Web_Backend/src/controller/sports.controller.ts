@@ -348,6 +348,21 @@ export class SportsController {
     }
   }
 
+  // 删除评论
+  @Del('/comments/:id')
+  async deleteComment(@Param('id') commentId: string, @Headers('authorization') authorization: string) {
+    try {
+      const user = await this.getUserFromToken(authorization);
+      const result = await this.sportsService.deleteComment(commentId, user.id);
+      return result;
+    } catch (error) {
+      return {
+        success: false,
+        message: '删除评论失败：' + error.message
+      };
+    }
+  }
+
   // ============ 用户历史记录接口 ============
 
   // 获取用户参与的活动

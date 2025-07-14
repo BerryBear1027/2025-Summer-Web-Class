@@ -3,6 +3,23 @@ import { sportsAPI } from '../api/sports';
 import './ActivityDetail.css';
 
 const ActivityDetail = ({ activity, user, onBack, onNavigate }) => {
+  // 添加安全检查
+  if (!activity) {
+    return (
+      <div className="activity-detail-container">
+        <div className="detail-header">
+          <button onClick={onBack} className="back-button">
+            ← 返回
+          </button>
+          <h1>活动详情</h1>
+        </div>
+        <div className="error-message">活动信息不存在</div>
+      </div>
+    );
+  }
+
+  console.log('ActivityDetail received activity:', activity);
+  console.log('ActivityDetail received user:', user);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
   const [loading, setLoading] = useState(false);
@@ -17,8 +34,9 @@ const ActivityDetail = ({ activity, user, onBack, onNavigate }) => {
   const loadComments = async () => {
     try {
       const response = await sportsAPI.getComments(activity.id, 'activity');
-      if (response.data.success) {
-        setComments(response.data.data || []);
+      console.log('Load comments response:', response); // 添加调试日志
+      if (response.success) {
+        setComments(response.data || []);
       }
     } catch (error) {
       console.error('加载评论失败：', error);
@@ -26,8 +44,9 @@ const ActivityDetail = ({ activity, user, onBack, onNavigate }) => {
   };
 
   const checkParticipation = () => {
+    // 根据后端实体定义，participants是string[]数组，存储的是用户ID
     const participating = activity.participants && 
-      activity.participants.some(p => p.id === user.id);
+      activity.participants.includes(user.id);
     setIsParticipating(participating);
   };
 
@@ -36,18 +55,15 @@ const ActivityDetail = ({ activity, user, onBack, onNavigate }) => {
     setError('');
     try {
       const response = await sportsAPI.joinActivity(activity.id);
-      if (response.data.success) {
+      console.log('Join activity response:', response); // 添加调试日志
+      if (response.success) {
         setIsParticipating(true);
-        // 更新参与者列表
+        // 更新参与者列表 - 添加用户ID到数组
         activity.participants = activity.participants || [];
-        activity.participants.push({
-          id: user.id,
-          username: user.username,
-          avatar: user.avatar
-        });
+        activity.participants.push(user.id);
         alert('报名成功！');
       } else {
-        setError(response.data.message || '报名失败');
+        setError(response.message || '报名失败');
       }
     } catch (error) {
       console.error('报名失败：', error);
@@ -64,13 +80,14 @@ const ActivityDetail = ({ activity, user, onBack, onNavigate }) => {
     setError('');
     try {
       const response = await sportsAPI.leaveActivity(activity.id);
-      if (response.data.success) {
+      console.log('Leave activity response:', response); // 添加调试日志
+      if (response.success) {
         setIsParticipating(false);
-        // 从参与者列表中移除
-        activity.participants = activity.participants.filter(p => p.id !== user.id);
+        // 从参与者列表中移除用户ID
+        activity.participants = activity.participants.filter(id => id !== user.id);
         alert('取消报名成功！');
       } else {
-        setError(response.data.message || '取消报名失败');
+        setError(response.message || '取消报名失败');
       }
     } catch (error) {
       console.error('取消报名失败：', error);
@@ -87,17 +104,36 @@ const ActivityDetail = ({ activity, user, onBack, onNavigate }) => {
     setError('');
     try {
       const response = await sportsAPI.cancelActivity(activity.id);
-      if (response.data.success) {
+      console.log('Cancel activity response:', response); // 添加调试日志
+      if (response.success) {
         alert('活动已解散');
         onBack();
       } else {
-        setError(response.data.message || '解散活动失败');
+        setError(response.message || '解散活动失败');
       }
     } catch (error) {
       console.error('解散活动失败：', error);
       setError('网络错误，请稍后重试');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    if (!window.confirm('确定要删除这条评论吗？')) return;
+
+    try {
+      const response = await sportsAPI.deleteComment(commentId);
+      console.log('Delete comment response:', response);
+
+      if (response.success) {
+        loadComments(); // 重新加载评论列表
+      } else {
+        setError(response.message || '删除评论失败');
+      }
+    } catch (error) {
+      console.error('删除评论失败：', error);
+      setError('网络错误，请稍后重试');
     }
   };
 
@@ -112,11 +148,13 @@ const ActivityDetail = ({ activity, user, onBack, onNavigate }) => {
         content: newComment.trim()
       });
 
-      if (response.data.success) {
+      console.log('Comment response:', response); // 添加调试日志
+
+      if (response.success) {
         setNewComment('');
         loadComments(); // 重新加载评论
       } else {
-        setError(response.data.message || '发表评论失败');
+        setError(response.message || '发表评论失败');
       }
     } catch (error) {
       console.error('发表评论失败：', error);
@@ -127,15 +165,21 @@ const ActivityDetail = ({ activity, user, onBack, onNavigate }) => {
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleString('zh-CN');
+    try {
+      return new Date(dateString).toLocaleString('zh-CN');
+    } catch (error) {
+      console.error('Date formatting error:', error);
+      return '时间格式错误';
+    }
   };
 
-  const isCreator = activity.creatorId === user.id;
+  const isCreator = activity.publisherId === user.id;
   const canJoin = !isParticipating && !isCreator && 
-    activity.status === 'active' && 
-    (activity.participants?.length || 0) < activity.maxParticipants;
+    activity.status === 'recruiting' && 
+    (activity.participants?.length || 0) < (activity.maxParticipants || 0);
 
-  return (
+  try {
+    return (
     <div className="activity-detail-container">
       <div className="detail-header">
         <button onClick={onBack} className="back-button">
@@ -150,8 +194,8 @@ const ActivityDetail = ({ activity, user, onBack, onNavigate }) => {
         <div className="activity-main">
           <div className="activity-header">
             <div className="title-section">
-              <h2>{activity.title}</h2>
-              <span className="activity-type">{activity.type}</span>
+              <h2>{activity.name}</h2>
+              <span className="activity-type">{activity.type || '活动'}</span>
             </div>
             <div className="status-section">
               <span className={`status ${activity.status}`}>{activity.status}</span>
@@ -178,7 +222,7 @@ const ActivityDetail = ({ activity, user, onBack, onNavigate }) => {
               </div>
               <div className="info-item">
                 <span className="label">发布者：</span>
-                <span>{activity.creatorName}</span>
+                <span>{activity.publisherName || '未知用户'}</span>
               </div>
               <div className="info-item">
                 <span className="label">发布时间：</span>
@@ -196,16 +240,12 @@ const ActivityDetail = ({ activity, user, onBack, onNavigate }) => {
             <h3>参与者 ({activity.participants?.length || 0})</h3>
             <div className="participants-list">
               {activity.participants && activity.participants.length > 0 ? (
-                activity.participants.map(participant => (
-                  <div key={participant.id} className="participant-item">
+                activity.participants.map((participantId, index) => (
+                  <div key={participantId} className="participant-item">
                     <div className="participant-avatar">
-                      {participant.avatar ? (
-                        <img src={`http://localhost:7001${participant.avatar}`} alt="" />
-                      ) : (
-                        <div className="avatar-placeholder">{participant.username[0]}</div>
-                      )}
+                      <div className="avatar-placeholder">P{index + 1}</div>
                     </div>
-                    <span>{participant.username}</span>
+                    <span>参与者 {index + 1}</span>
                   </div>
                 ))
               ) : (
@@ -241,7 +281,7 @@ const ActivityDetail = ({ activity, user, onBack, onNavigate }) => {
               </button>
             ) : (
               <div className="cannot-join">
-                {activity.status !== 'active' ? '活动已结束' : '人数已满'}
+                {activity.status !== 'recruiting' ? '活动已结束' : '人数已满'}
               </div>
             )}
           </div>
@@ -278,12 +318,23 @@ const ActivityDetail = ({ activity, user, onBack, onNavigate }) => {
                         {comment.userAvatar ? (
                           <img src={`http://localhost:7001${comment.userAvatar}`} alt="" />
                         ) : (
-                          <div className="avatar-placeholder">{comment.username[0]}</div>
+                          <div className="avatar-placeholder">{(comment.userName || '?')[0]}</div>
                         )}
                       </div>
-                      <span className="commenter-name">{comment.username}</span>
+                      <span className="commenter-name">{comment.userName || '未知用户'}</span>
                     </div>
-                    <span className="comment-time">{formatDate(comment.createdAt)}</span>
+                    <div className="comment-actions">
+                      <span className="comment-time">{formatDate(comment.createdAt)}</span>
+                      {comment.userId === user.id && (
+                        <button 
+                          className="delete-comment-btn"
+                          onClick={() => handleDeleteComment(comment.id)}
+                          title="删除评论"
+                        >
+                          删除
+                        </button>
+                      )}
+                    </div>
                   </div>
                   <div className="comment-content">
                     {comment.content}
@@ -296,6 +347,20 @@ const ActivityDetail = ({ activity, user, onBack, onNavigate }) => {
       </div>
     </div>
   );
+  } catch (error) {
+    console.error('ActivityDetail render error:', error);
+    return (
+      <div className="activity-detail-container">
+        <div className="detail-header">
+          <button onClick={onBack} className="back-button">
+            ← 返回
+          </button>
+          <h1>活动详情</h1>
+        </div>
+        <div className="error-message">页面渲染出错，请返回重试</div>
+      </div>
+    );
+  }
 };
 
 export default ActivityDetail;
