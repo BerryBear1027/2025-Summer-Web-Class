@@ -111,8 +111,8 @@ const CreateVenue = ({ user, onBack, onSuccess }) => {
       // 如果有图片，先上传图片
       if (image) {
         const uploadResponse = await sportsAPI.uploadImage(image);
-        if (uploadResponse.data.success) {
-          imageUrl = uploadResponse.data.data.url;
+        if (uploadResponse.success) {
+          imageUrl = uploadResponse.data.url;
         } else {
           setError('图片上传失败');
           setLoading(false);
@@ -130,11 +130,11 @@ const CreateVenue = ({ user, onBack, onSuccess }) => {
 
       const response = await sportsAPI.createVenue(venueData);
 
-      if (response.data.success) {
+      if (response.success) {
         alert('场馆发布成功！');
         onSuccess();
       } else {
-        setError(response.data.message || '发布场馆失败');
+        setError(response.message || '发布场馆失败');
       }
     } catch (error) {
       console.error('发布场馆失败：', error);

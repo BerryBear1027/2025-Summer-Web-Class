@@ -4,7 +4,7 @@ import './CreateActivity.css';
 
 const CreateActivity = ({ user, onBack, onSuccess }) => {
   const [formData, setFormData] = useState({
-    title: '',
+    name: '',
     description: '',
     type: '',
     location: '',
@@ -52,7 +52,7 @@ const CreateActivity = ({ user, onBack, onSuccess }) => {
   };
 
   const validateForm = () => {
-    if (!formData.title.trim()) {
+    if (!formData.name.trim()) {
       setError('请输入活动名称');
       return false;
     }
@@ -119,8 +119,8 @@ const CreateActivity = ({ user, onBack, onSuccess }) => {
       // 如果有图片，先上传图片
       if (image) {
         const uploadResponse = await sportsAPI.uploadImage(image);
-        if (uploadResponse.data.success) {
-          imageUrl = uploadResponse.data.data.url;
+        if (uploadResponse.success) {
+          imageUrl = uploadResponse.data.url;
         } else {
           setError('图片上传失败');
           setLoading(false);
@@ -137,11 +137,11 @@ const CreateActivity = ({ user, onBack, onSuccess }) => {
 
       const response = await sportsAPI.createActivity(activityData);
 
-      if (response.data.success) {
+      if (response.success) {
         alert('活动发布成功！');
         onSuccess();
       } else {
-        setError(response.data.message || '发布活动失败');
+        setError(response.message || '发布活动失败');
       }
     } catch (error) {
       console.error('发布活动失败：', error);
@@ -171,12 +171,12 @@ const CreateActivity = ({ user, onBack, onSuccess }) => {
             <h3>基本信息</h3>
             
             <div className="form-group">
-              <label htmlFor="title">活动名称 *</label>
+              <label htmlFor="name">活动名称 *</label>
               <input
                 type="text"
-                id="title"
-                name="title"
-                value={formData.title}
+                id="name"
+                name="name"
+                value={formData.name}
                 onChange={handleInputChange}
                 placeholder="输入活动名称"
                 required

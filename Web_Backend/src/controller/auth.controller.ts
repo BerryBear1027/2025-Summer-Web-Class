@@ -204,6 +204,95 @@ export class AuthController {
     }
   }
 
+  // 上传图片（用于活动和场馆）
+  @Post('/upload-image')
+  async uploadImage(@Files() files: any[], @Headers('authorization') authorization: string) {
+    try {
+      console.log('收到图片上传请求');
+      
+      if (!authorization || !authorization.startsWith('Bearer ')) {
+        return {
+          success: false,
+          message: '未提供有效的token'
+        };
+      }
+
+      const token = authorization.substring(7);
+      const decoded = this.userService.verifyToken(token);
+      
+      if (!decoded.userId) {
+        return {
+          success: false,
+          message: '无效的token'
+        };
+      }
+
+      if (!files || files.length === 0) {
+        return {
+          success: false,
+          message: '未选择文件'
+        };
+      }
+
+      const file = files[0];
+      console.log('文件信息：', {
+        filename: file.filename,
+        mimeType: file.mimeType,
+        data: file.data.length
+      });
+
+      // 验证文件类型
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+      if (!allowedTypes.includes(file.mimeType)) {
+        return {
+          success: false,
+          message: '不支持的文件类型，只允许 JPEG、PNG、GIF 格式'
+        };
+      }
+
+      // 验证文件大小 (5MB)
+      if (file.data.length > 5 * 1024 * 1024) {
+        return {
+          success: false,
+          message: '文件大小不能超过5MB'
+        };
+      }
+
+      // 创建上传目录
+      const uploadDir = path.join(process.cwd(), 'uploads', 'images');
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+
+      // 生成文件名
+      const ext = path.extname(file.filename);
+      const filename = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}${ext}`;
+      const filepath = path.join(uploadDir, filename);
+
+      // 保存文件
+      fs.writeFileSync(filepath, file.data);
+
+      console.log('图片保存成功：', filepath);
+
+      // 返回图片URL
+      const imageUrl = `/uploads/images/${filename}`;
+      
+      return {
+        success: true,
+        message: '图片上传成功',
+        data: {
+          url: imageUrl
+        }
+      };
+    } catch (error) {
+      console.error('图片上传失败：', error);
+      return {
+        success: false,
+        message: '上传图片失败：' + error.message
+      };
+    }
+  }
+
   // 登出
   @Post('/logout')
   async logout() {

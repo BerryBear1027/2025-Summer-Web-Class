@@ -157,6 +157,16 @@ export const sportsAPI = {
     });
   },
 
+  // 获取用户的预约记录
+  getUserBookings: () => {
+    const token = localStorage.getItem('token');
+    return api.get('/sports/my-bookings', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+  },
+
   // 获取用户发布的内容
   getUserPublications: () => {
     const token = localStorage.getItem('token');
@@ -175,7 +185,7 @@ export const sportsAPI = {
     const formData = new FormData();
     formData.append('file', file);
 
-    return api.post('/auth/upload-avatar', formData, {
+    return api.post('/auth/upload-image', formData, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'multipart/form-data'

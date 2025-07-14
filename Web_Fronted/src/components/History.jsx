@@ -26,10 +26,14 @@ const History = ({ user, onBack, onNavigate }) => {
         sportsAPI.getUserPublications()
       ]);
 
+      console.log('User activities response:', activitiesRes);
+      console.log('User bookings response:', bookingsRes);
+      console.log('User publications response:', publicationsRes);
+
       setData({
-        activities: activitiesRes.data.success ? activitiesRes.data.data || [] : [],
-        bookings: bookingsRes.data.success ? bookingsRes.data.data || [] : [],
-        publications: publicationsRes.data.success ? publicationsRes.data.data || [] : []
+        activities: activitiesRes.success ? activitiesRes.data || [] : [],
+        bookings: bookingsRes.success ? bookingsRes.data || [] : [],
+        publications: publicationsRes.success ? publicationsRes.data || [] : []
       });
     } catch (error) {
       console.error('加载历史记录失败：', error);
@@ -44,11 +48,11 @@ const History = ({ user, onBack, onNavigate }) => {
 
     try {
       const response = await sportsAPI.cancelBooking(bookingId);
-      if (response.data.success) {
+      if (response.success) {
         alert('预约已取消');
         loadData(); // 重新加载数据
       } else {
-        alert(response.data.message || '取消预约失败');
+        alert(response.message || '取消预约失败');
       }
     } catch (error) {
       console.error('取消预约失败：', error);

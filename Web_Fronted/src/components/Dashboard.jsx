@@ -14,7 +14,7 @@ const Dashboard = ({ user, onNavigate, onLogout }) => {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, []); // 确保只在组件挂载时执行一次
 
   const loadData = async () => {
     setLoading(true);
@@ -25,11 +25,29 @@ const Dashboard = ({ user, onNavigate, onLogout }) => {
         sportsAPI.getAllVenues()
       ]);
 
-      if (activitiesRes.data.success) {
-        setActivities(activitiesRes.data.data || []);
+      console.log('Activities response:', activitiesRes);
+      console.log('Venues response:', venuesRes);
+
+      // 添加更详细的日志
+      if (activitiesRes && activitiesRes.data) {
+        console.log('Activities data:', activitiesRes.data);
+        console.log('Activities count:', activitiesRes.data.length);
+        if (activitiesRes.data.length > 0) {
+          console.log('First activity:', activitiesRes.data[0]);
+        }
       }
-      if (venuesRes.data.success) {
-        setVenues(venuesRes.data.data || []);
+
+      if (activitiesRes.success) {
+        setActivities(activitiesRes.data || []);
+        console.log('Set activities:', activitiesRes.data || []);
+      } else {
+        console.log('Activities request failed:', activitiesRes);
+      }
+      if (venuesRes.success) {
+        setVenues(venuesRes.data || []);
+        console.log('Set venues:', venuesRes.data || []);
+      } else {
+        console.log('Venues request failed:', venuesRes);
       }
     } catch (error) {
       console.error('加载数据失败：', error);
@@ -49,13 +67,13 @@ const Dashboard = ({ user, onNavigate, onLogout }) => {
     try {
       if (activeTab === 'activities') {
         const res = await sportsAPI.searchActivities(searchKeyword);
-        if (res.data.success) {
-          setActivities(res.data.data || []);
+        if (res.success) {
+          setActivities(res.data || []);
         }
       } else {
         const res = await sportsAPI.searchVenues(searchKeyword);
-        if (res.data.success) {
-          setVenues(res.data.data || []);
+        if (res.success) {
+          setVenues(res.data || []);
         }
       }
     } catch (error) {
@@ -318,8 +336,8 @@ const Dashboard = ({ user, onNavigate, onLogout }) => {
                       <div className="card-content">
                         <div className="item-header">
                           <div className="item-title">
-                            <h3>{activity.title}</h3>
-                            <span className="item-type">{activity.type}</span>
+                            <h3>{activity.name}</h3>
+                            <span className="item-type">{activity.type || '活动'}</span>
                           </div>
                           <div className="item-meta">
                             <span className={`status-badge status-${activity.status}`}>
@@ -350,13 +368,13 @@ const Dashboard = ({ user, onNavigate, onLogout }) => {
                         <div className="item-footer">
                           <div className="creator-info">
                             <div className="creator-avatar">
-                              {activity.creatorAvatar ? (
-                                <img src={`http://localhost:7001${activity.creatorAvatar}`} alt="" />
+                              {activity.publisherAvatar ? (
+                                <img src={`http://localhost:7001${activity.publisherAvatar}`} alt="" />
                               ) : (
-                                <div className="avatar-placeholder-sm">{activity.creatorName[0]}</div>
+                                <div className="avatar-placeholder-sm">{(activity.publisherName || '?')[0]}</div>
                               )}
                             </div>
-                            <span>{activity.creatorName}</span>
+                            <span>{activity.publisherName || '未知用户'}</span>
                           </div>
                           <div className="publish-time">
                             {formatDate(activity.createdAt)}
@@ -404,7 +422,7 @@ const Dashboard = ({ user, onNavigate, onLogout }) => {
                         <div className="item-details">
                           <div className="detail-item">
                             <span className="detail-icon">📍</span>
-                            <span>{venue.address}</span>
+                            <span>{venue.location}</span>
                           </div>
                           <div className="detail-item">
                             <span className="detail-icon">🏃</span>
@@ -423,13 +441,13 @@ const Dashboard = ({ user, onNavigate, onLogout }) => {
                         <div className="item-footer">
                           <div className="creator-info">
                             <div className="creator-avatar">
-                              {venue.creatorAvatar ? (
-                                <img src={`http://localhost:7001${venue.creatorAvatar}`} alt="" />
+                              {venue.publisherAvatar ? (
+                                <img src={`http://localhost:7001${venue.publisherAvatar}`} alt="" />
                               ) : (
-                                <div className="avatar-placeholder-sm">{venue.creatorName[0]}</div>
+                                <div className="avatar-placeholder-sm">{(venue.publisherName || '?')[0]}</div>
                               )}
                             </div>
-                            <span>{venue.creatorName}</span>
+                            <span>{venue.publisherName || '未知用户'}</span>
                           </div>
                           <div className="publish-time">
                             {formatDate(venue.createdAt)}
