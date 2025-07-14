@@ -282,6 +282,36 @@
   border-left-color: #3b82f6;
 }
 
+/* 头像样式 */
+.avatar-placeholder, .avatar-placeholder-large, .avatar-placeholder-sm {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-weight: 600;
+  text-transform: uppercase;
+  border-radius: 50%;
+}
+
+.avatar-placeholder {
+  width: 32px;
+  height: 32px;
+  font-size: 14px;
+}
+
+.avatar-placeholder-large {
+  width: 80px;
+  height: 80px;
+  font-size: 32px;
+}
+
+.avatar-placeholder-sm {
+  width: 24px;
+  height: 24px;
+  font-size: 11px;
+}
+
 /* 响应式设计 */
 @media (max-width: 768px) {
   .history-header {

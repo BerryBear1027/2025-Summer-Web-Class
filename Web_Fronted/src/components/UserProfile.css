@@ -166,36 +166,55 @@
   margin-bottom: 16px;
 }
 
-.avatar-image {
+.avatar-placeholder-large {
   width: 120px;
   height: 120px;
   border-radius: 50%;
-  object-fit: cover;
+  background: linear-gradient(135deg, #ff6b9d 0%, #ff8cc8 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 48px;
+  font-weight: 600;
   border: 3px solid #d0d7de;
-  background-color: #f6f8fa;
+  box-shadow: 0 4px 20px rgba(255, 107, 157, 0.2);
 }
 
-.avatar-upload-label {
-  display: inline-block;
-  background-color: #f6f8fa;
-  color: #24292f;
-  border: 1px solid #d0d7de;
-  padding: 6px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  margin-top: 8px;
+/* 头像样式 */
+.avatar-placeholder, .avatar-placeholder-large, .avatar-placeholder-sm {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-weight: 600;
+  text-transform: uppercase;
+  border-radius: 50%;
 }
 
-.avatar-upload-label:hover {
-  background-color: #eaeef2;
-  border-color: #afb8c1;
+.avatar-placeholder {
+  width: 32px;
+  height: 32px;
+  font-size: 14px;
 }
 
-.avatar-upload-input {
-  display: none;
+.avatar-placeholder-large {
+  width: 80px;
+  height: 80px;
+  font-size: 32px;
+}
+
+.avatar-placeholder-sm {
+  width: 24px;
+  height: 24px;
+  font-size: 11px;
+}
+
+.avatar-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
 }
 
 .user-stats {

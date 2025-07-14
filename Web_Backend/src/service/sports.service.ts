@@ -21,13 +21,12 @@ export class SportsService {
   // ============ 活动管理 ============
 
   // 创建活动
-  async createActivity(userId: string, userName: string, userAvatar: string, activityData: CreateActivityDto): Promise<{ success: boolean; message: string; data?: Activity }> {
+  async createActivity(userId: string, userName: string, activityData: CreateActivityDto): Promise<{ success: boolean; message: string; data?: Activity }> {
     try {
       const activity = new Activity({
         ...activityData,
         publisherId: userId,
         publisherName: userName,
-        publisherAvatar: userAvatar,
       });
 
       this.activities.set(activity.id, activity);
@@ -47,9 +46,21 @@ export class SportsService {
 
   // 获取所有活动
   async getAllActivities(): Promise<Activity[]> {
-    return Array.from(this.activities.values())
-      .map(activity => activity.toJSON() as Activity)
+    const activities = Array.from(this.activities.values())
+      .map(activity => {
+        const activityData = activity.toJSON() as Activity;
+        // 为每个活动添加参与者详细信息
+        activityData.participantDetails = activityData.participants.map(participantId => {
+          // 这里应该从用户服务获取用户信息，但现在简化处理
+          return {
+            id: participantId,
+            username: `用户${participantId.slice(-4)}` // 使用ID后4位作为临时用户名
+          };
+        });
+        return activityData;
+      })
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    return activities;
   }
 
   // 根据ID获取活动
@@ -159,13 +170,12 @@ export class SportsService {
   // ============ 场馆管理 ============
 
   // 创建场馆
-  async createVenue(userId: string, userName: string, userAvatar: string, venueData: CreateVenueDto): Promise<{ success: boolean; message: string; data?: Venue }> {
+  async createVenue(userId: string, userName: string, venueData: CreateVenueDto): Promise<{ success: boolean; message: string; data?: Venue }> {
     try {
       const venue = new Venue({
         ...venueData,
         publisherId: userId,
         publisherName: userName,
-        publisherAvatar: userAvatar,
       });
 
       this.venues.set(venue.id, venue);
@@ -319,13 +329,12 @@ export class SportsService {
   // ============ 评论管理 ============
 
   // 添加评论
-  async createComment(userId: string, userName: string, userAvatar: string, commentData: CreateCommentDto): Promise<{ success: boolean; message: string; data?: Comment }> {
+  async createComment(userId: string, userName: string, commentData: CreateCommentDto): Promise<{ success: boolean; message: string; data?: Comment }> {
     try {
       const comment = new Comment({
         ...commentData,
         userId,
         userName,
-        userAvatar,
       });
 
       this.comments.set(comment.id, comment);

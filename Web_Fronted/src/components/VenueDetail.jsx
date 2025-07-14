@@ -279,13 +279,9 @@ const VenueDetail = ({ venue, user, onBack, onNavigate }) => {
                   <div className="comment-header">
                     <div className="commenter-info">
                       <div className="commenter-avatar">
-                        {comment.userAvatar ? (
-                          <img src={`http://localhost:7001${comment.userAvatar}`} alt="" />
-                        ) : (
-                          <div className="avatar-placeholder">{comment.username[0]}</div>
-                        )}
+                        <div className="avatar-placeholder">{(comment.userName || comment.username || '?')[0]}</div>
                       </div>
-                      <span className="commenter-name">{comment.username}</span>
+                      <span className="commenter-name">{comment.userName || comment.username || '未知用户'}</span>
                     </div>
                     <span className="comment-time">{formatDate(comment.createdAt)}</span>
                   </div>

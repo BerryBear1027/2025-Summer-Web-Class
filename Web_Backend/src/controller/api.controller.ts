@@ -153,7 +153,6 @@ export class APIController {
           username: user.username,
           email: user.email,
           phone: user.phone,
-          hasAvatar: !!user.avatar,
           createdAt: user.createdAt
         })),
         note: 'Each user can login and get their own JWT token for concurrent access'

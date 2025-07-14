@@ -2,7 +2,7 @@ import { Provide, Singleton } from '@midwayjs/core';
 import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
 import { IUserOptions } from '../interface';
-import { User, RegisterUserDto, LoginUserDto, UserResponseDto } from '../entity/user.entity';
+import { User, RegisterUserDto, LoginUserDto, UserResponseDto, UpdateUserDto } from '../entity/user.entity';
 
 @Provide()
 @Singleton()  // 确保这是单例
@@ -174,10 +174,12 @@ export class UserService {
     return user ? user.toJSON() as UserResponseDto : null;
   }
 
-  // 更新用户头像
-  async updateAvatar(userId: string, avatarUrl: string): Promise<{ success: boolean; message: string; data?: UserResponseDto }> {
+  // 更新用户信息
+  async updateProfile(token: string, userData: UpdateUserDto): Promise<{ success: boolean; message: string; data?: UserResponseDto }> {
     try {
-      const user = this.users.get(userId);
+      const decoded = this.verifyToken(token);
+      const user = this.users.get(decoded.userId);
+
       if (!user) {
         return {
           success: false,
@@ -185,18 +187,62 @@ export class UserService {
         };
       }
 
-      user.avatar = avatarUrl;
-      user.updatedAt = new Date();
+      // 检查用户名是否已被其他用户占用
+      if (userData.username && userData.username !== user.username) {
+        const existingUser = Array.from(this.users.values()).find(
+          u => u.username === userData.username && u.id !== user.id
+        );
+        if (existingUser) {
+          return {
+            success: false,
+            message: '用户名已存在'
+          };
+        }
+      }
+
+      // 检查邮箱是否已被其他用户占用
+      if (userData.email && userData.email !== user.email) {
+        const existingEmail = Array.from(this.users.values()).find(
+          u => u.email === userData.email && u.id !== user.id
+        );
+        if (existingEmail) {
+          return {
+            success: false,
+            message: '邮箱已被其他用户使用'
+          };
+        }
+      }
+
+      // 检查手机号是否已被其他用户占用
+      if (userData.phone && userData.phone !== user.phone) {
+        const existingPhone = Array.from(this.users.values()).find(
+          u => u.phone === userData.phone && u.id !== user.id
+        );
+        if (existingPhone) {
+          return {
+            success: false,
+            message: '手机号已被其他用户使用'
+          };
+        }
+      }
+
+      // 更新用户信息
+      Object.assign(user, {
+        ...userData,
+        updatedAt: new Date()
+      });
+
+      console.log('✅ 用户信息更新成功:', { id: user.id, username: user.username });
 
       return {
         success: true,
-        message: '头像更新成功',
+        message: '更新成功',
         data: user.toJSON() as UserResponseDto
       };
     } catch (error) {
       return {
         success: false,
-        message: '头像更新失败：' + error.message
+        message: '更新失败：' + error.message
       };
     }
   }

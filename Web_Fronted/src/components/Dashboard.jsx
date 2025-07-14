@@ -174,11 +174,7 @@ const Dashboard = ({ user, onNavigate, onLogout }) => {
             </div>
             <div className="user-menu">
               <div className="user-avatar" onClick={() => onNavigate('profile')}>
-                {user.avatar ? (
-                  <img src={`http://localhost:7001${user.avatar}`} alt="头像" />
-                ) : (
-                  <div className="avatar-placeholder">{user.username[0]}</div>
-                )}
+                <div className="avatar-placeholder">{user.username[0]}</div>
               </div>
             </div>
           </div>
@@ -193,11 +189,7 @@ const Dashboard = ({ user, onNavigate, onLogout }) => {
             <div className="user-section">
               <div className="user-profile" onClick={() => onNavigate('profile')}>
                 <div className="user-avatar-large">
-                  {user.avatar ? (
-                    <img src={`http://localhost:7001${user.avatar}`} alt="头像" />
-                  ) : (
-                    <div className="avatar-placeholder-large">{user.username[0]}</div>
-                  )}
+                  <div className="avatar-placeholder-large">{user.username[0]}</div>
                 </div>
                 {!sidebarCollapsed && (
                   <div className="user-info">
@@ -210,32 +202,6 @@ const Dashboard = ({ user, onNavigate, onLogout }) => {
 
             {/* 导航菜单 */}
             <nav className="sidebar-nav">
-              <div className="nav-section">
-                <h4 className={`nav-title ${sidebarCollapsed ? 'hidden' : ''}`}>内容</h4>
-                <ul className="nav-list">
-                  <li className={`nav-item ${activeTab === 'activities' ? 'active' : ''}`}>
-                    <button 
-                      onClick={() => setActiveTab('activities')}
-                      className="nav-link"
-                      title="活动"
-                    >
-                      <span className="nav-icon">活动</span>
-                      {!sidebarCollapsed && <span>活动列表</span>}
-                    </button>
-                  </li>
-                  <li className={`nav-item ${activeTab === 'venues' ? 'active' : ''}`}>
-                    <button 
-                      onClick={() => setActiveTab('venues')}
-                      className="nav-link"
-                      title="场馆"
-                    >
-                      <span className="nav-icon">场馆</span>
-                      {!sidebarCollapsed && <span>场馆列表</span>}
-                    </button>
-                  </li>
-                </ul>
-              </div>
-
               <div className="nav-section">
                 <h4 className={`nav-title ${sidebarCollapsed ? 'hidden' : ''}`}>个人</h4>
                 <ul className="nav-list">
@@ -344,7 +310,14 @@ const Dashboard = ({ user, onNavigate, onLogout }) => {
                           </div>
                           <div className="item-meta">
                             <span className={`status-badge status-${activity.status}`}>
-                              {activity.status}
+                              {activity.status === 'recruiting' ? '招募中' : 
+                               activity.status === 'full' ? '已满员' :
+                               activity.status === 'ongoing' ? '进行中' :
+                               activity.status === 'completed' ? '已结束' :
+                               activity.status === 'cancelled' ? '已取消' : activity.status}
+                            </span>
+                            <span className="participants-count">
+                              {activity.participants?.length || 0}/{activity.maxParticipants}人
                             </span>
                           </div>
                         </div>
@@ -371,11 +344,7 @@ const Dashboard = ({ user, onNavigate, onLogout }) => {
                         <div className="item-footer">
                           <div className="creator-info">
                             <div className="creator-avatar">
-                              {activity.publisherAvatar ? (
-                                <img src={`http://localhost:7001${activity.publisherAvatar}`} alt="" />
-                              ) : (
-                                <div className="avatar-placeholder-sm">{(activity.publisherName || '?')[0]}</div>
-                              )}
+                              <div className="avatar-placeholder-sm">{(activity.publisherName || '?')[0]}</div>
                             </div>
                             <span>{activity.publisherName || '未知用户'}</span>
                           </div>
@@ -444,11 +413,7 @@ const Dashboard = ({ user, onNavigate, onLogout }) => {
                         <div className="item-footer">
                           <div className="creator-info">
                             <div className="creator-avatar">
-                              {venue.publisherAvatar ? (
-                                <img src={`http://localhost:7001${venue.publisherAvatar}`} alt="" />
-                              ) : (
-                                <div className="avatar-placeholder-sm">{(venue.publisherName || '?')[0]}</div>
-                              )}
+                              <div className="avatar-placeholder-sm">{(venue.publisherName || '?')[0]}</div>
                             </div>
                             <span>{venue.publisherName || '未知用户'}</span>
                           </div>

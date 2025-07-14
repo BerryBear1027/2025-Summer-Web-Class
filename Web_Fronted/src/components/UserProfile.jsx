@@ -90,36 +90,6 @@ const UserProfile = ({ user: initialUser, onLogout, onUserUpdate, onBack }) => {
     setSuccessMessage('');
   };
 
-  const handleAvatarUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    if (file.size > 5 * 1024 * 1024) {
-      setError('头像文件大小不能超过5MB');
-      return;
-    }
-
-    if (!file.type.startsWith('image/')) {
-      setError('请选择图片文件');
-      return;
-    }
-
-    try {
-      setError('');
-      const result = await authAPI.uploadAvatar(file);
-      if (result.success) {
-        setUser({ ...user, avatar: result.data.avatar });
-        setSuccessMessage('头像更新成功');
-        setTimeout(() => setSuccessMessage(''), 3000);
-      } else {
-        setError(result.message || '头像上传失败');
-      }
-    } catch (error) {
-      console.error('上传头像失败:', error);
-      setError('头像上传失败，请重试');
-    }
-  };
-
   if (loading) {
     return (
       <div className="profile-container">
@@ -179,21 +149,9 @@ const UserProfile = ({ user: initialUser, onLogout, onUserUpdate, onBack }) => {
         <div className="profile-sidebar">
           <div className="avatar-section">
             <div className="avatar-container">
-              <img 
-                src={user.avatar || '/default-avatar.png'} 
-                alt="用户头像" 
-                className="avatar-image"
-              />
-              <label htmlFor="avatar-upload" className="avatar-upload-label">
-                更换头像
-              </label>
-              <input
-                id="avatar-upload"
-                type="file"
-                accept="image/*"
-                onChange={handleAvatarUpload}
-                className="avatar-upload-input"
-              />
+              <div className="avatar-placeholder-large">
+                {user.username ? user.username[0] : '?'}
+              </div>
             </div>
           </div>
 

@@ -41,7 +41,6 @@ export class SportsController {
       const result = await this.sportsService.createActivity(
         user.id, 
         user.username, 
-        user.avatar || '', 
         activityData
       );
       return result;
@@ -169,7 +168,6 @@ export class SportsController {
       const result = await this.sportsService.createVenue(
         user.id, 
         user.username, 
-        user.avatar || '', 
         venueData
       );
       return result;
@@ -318,7 +316,6 @@ export class SportsController {
       const result = await this.sportsService.createComment(
         user.id, 
         user.username, 
-        user.avatar || '', 
         commentData
       );
       return result;

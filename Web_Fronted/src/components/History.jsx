@@ -130,31 +130,43 @@ const History = ({ user, onBack, onNavigate }) => {
                   <div key={activity.id} className="history-item activity-item">
                     <div className="item-header">
                       <h3 onClick={() => onNavigate('activity-detail', activity)}>
-                        {activity.title}
+                        {activity.name}
                       </h3>
                       <span 
                         className="status"
                         style={{ backgroundColor: getStatusColor(activity.status) }}
                       >
-                        {activity.status}
+                        {activity.status === 'recruiting' ? '招募中' : 
+                         activity.status === 'full' ? '已满员' :
+                         activity.status === 'ongoing' ? '进行中' :
+                         activity.status === 'completed' ? '已结束' :
+                         activity.status === 'cancelled' ? '已取消' : activity.status}
                       </span>
                     </div>
                     <div className="item-content">
                       <div className="item-info">
-                        <span className="info-label">类型：</span>
-                        <span>{activity.type}</span>
+                        <span className="info-label">活动类型：</span>
+                        <span>{activity.type || '活动'}</span>
                       </div>
                       <div className="item-info">
-                        <span className="info-label">地点：</span>
+                        <span className="info-label">活动地点：</span>
                         <span>{activity.location}</span>
                       </div>
                       <div className="item-info">
-                        <span className="info-label">时间：</span>
-                        <span>{formatDate(activity.startTime)} - {formatDate(activity.endTime)}</span>
+                        <span className="info-label">开始时间：</span>
+                        <span>{formatDate(activity.startTime)}</span>
                       </div>
                       <div className="item-info">
-                        <span className="info-label">参与时间：</span>
-                        <span>{formatDate(activity.joinedAt)}</span>
+                        <span className="info-label">结束时间：</span>
+                        <span>{formatDate(activity.endTime)}</span>
+                      </div>
+                      <div className="item-info">
+                        <span className="info-label">参与人数：</span>
+                        <span>{activity.participants?.length || 0}/{activity.maxParticipants}人</span>
+                      </div>
+                      <div className="item-info">
+                        <span className="info-label">发布者：</span>
+                        <span>{activity.publisherName || '未知用户'}</span>
                       </div>
                     </div>
                   </div>

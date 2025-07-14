@@ -11,9 +11,9 @@ export interface IActivity {
   image?: string;
   publisherId: string;
   publisherName: string;
-  publisherAvatar?: string;
   status: 'recruiting' | 'full' | 'ongoing' | 'completed' | 'cancelled';
   participants: string[]; // 参与者用户ID数组
+  participantDetails?: Array<{id: string; username: string}>; // 参与者详细信息
   createdAt: Date;
   updatedAt: Date;
 }
@@ -30,9 +30,9 @@ export class Activity implements IActivity {
   image?: string;
   publisherId: string;
   publisherName: string;
-  publisherAvatar?: string;
   status: 'recruiting' | 'full' | 'ongoing' | 'completed' | 'cancelled';
   participants: string[];
+  participantDetails?: Array<{id: string; username: string}>;
   createdAt: Date;
   updatedAt: Date;
 
@@ -48,7 +48,6 @@ export class Activity implements IActivity {
     this.image = data.image;
     this.publisherId = data.publisherId || '';
     this.publisherName = data.publisherName || '';
-    this.publisherAvatar = data.publisherAvatar;
     this.status = data.status || 'recruiting';
     this.participants = data.participants || [];
     this.createdAt = data.createdAt || new Date();
@@ -72,9 +71,9 @@ export class Activity implements IActivity {
       image: this.image,
       publisherId: this.publisherId,
       publisherName: this.publisherName,
-      publisherAvatar: this.publisherAvatar,
       status: this.status,
       participants: this.participants,
+      participantDetails: this.participantDetails,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
     };
@@ -96,7 +95,6 @@ export interface IVenue {
   image?: string;
   publisherId: string;
   publisherName: string;
-  publisherAvatar?: string;
   status: 'available' | 'maintenance' | 'closed';
   bookings: string[]; // 预约记录ID数组
   createdAt: Date;
@@ -114,7 +112,6 @@ export class Venue implements IVenue {
   image?: string;
   publisherId: string;
   publisherName: string;
-  publisherAvatar?: string;
   status: 'available' | 'maintenance' | 'closed';
   bookings: string[];
   createdAt: Date;
@@ -131,7 +128,6 @@ export class Venue implements IVenue {
     this.image = data.image;
     this.publisherId = data.publisherId || '';
     this.publisherName = data.publisherName || '';
-    this.publisherAvatar = data.publisherAvatar;
     this.status = data.status || 'available';
     this.bookings = data.bookings || [];
     this.createdAt = data.createdAt || new Date();
@@ -154,7 +150,6 @@ export class Venue implements IVenue {
       image: this.image,
       publisherId: this.publisherId,
       publisherName: this.publisherName,
-      publisherAvatar: this.publisherAvatar,
       status: this.status,
       bookings: this.bookings,
       createdAt: this.createdAt,
@@ -237,7 +232,6 @@ export interface IComment {
   targetType: 'activity' | 'venue';
   userId: string;
   userName: string;
-  userAvatar?: string;
   content: string;
   createdAt: Date;
   updatedAt: Date;
@@ -249,7 +243,6 @@ export class Comment implements IComment {
   targetType: 'activity' | 'venue';
   userId: string;
   userName: string;
-  userAvatar?: string;
   content: string;
   createdAt: Date;
   updatedAt: Date;
@@ -260,7 +253,6 @@ export class Comment implements IComment {
     this.targetType = data.targetType || 'activity';
     this.userId = data.userId || '';
     this.userName = data.userName || '';
-    this.userAvatar = data.userAvatar;
     this.content = data.content || '';
     this.createdAt = data.createdAt || new Date();
     this.updatedAt = data.updatedAt || new Date();
@@ -277,7 +269,6 @@ export class Comment implements IComment {
       targetType: this.targetType,
       userId: this.userId,
       userName: this.userName,
-      userAvatar: this.userAvatar,
       content: this.content,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,

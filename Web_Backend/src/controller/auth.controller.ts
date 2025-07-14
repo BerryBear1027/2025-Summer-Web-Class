@@ -1,7 +1,7 @@
-import { Inject, Controller, Post, Get, Body, Headers, Files } from '@midwayjs/core';
+import { Inject, Controller, Post, Get, Put, Body, Headers, Files } from '@midwayjs/core';
 import { Context } from '@midwayjs/koa';
 import { UserService } from '../service/user.service';
-import { RegisterUserDto, LoginUserDto } from '../entity/user.entity';
+import { RegisterUserDto, LoginUserDto, UpdateUserDto } from '../entity/user.entity';
 import * as path from 'path';
 import * as fs from 'fs';
 
@@ -121,12 +121,10 @@ export class AuthController {
     }
   }
 
-  // 上传头像
-  @Post('/upload-avatar')
-  async uploadAvatar(@Files() files: any[], @Headers('authorization') authorization: string) {
+  // 更新用户信息
+  @Put('/profile')
+  async updateProfile(@Body() userData: UpdateUserDto, @Headers('authorization') authorization: string) {
     try {
-      console.log('收到头像上传请求');
-      
       if (!authorization || !authorization.startsWith('Bearer ')) {
         return {
           success: false,
@@ -135,71 +133,12 @@ export class AuthController {
       }
 
       const token = authorization.substring(7);
-      const decoded = this.userService.verifyToken(token);
-      
-      if (!files || files.length === 0) {
-        return {
-          success: false,
-          message: '未上传文件'
-        };
-      }
-
-      const file = files[0];
-      console.log('上传的文件信息：', {
-        filename: file.filename,
-        mimeType: file.mimeType,
-        size: file.data?.length || 'unknown'
-      });
-      
-      // 检查文件类型
-      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-      if (!allowedTypes.includes(file.mimeType)) {
-        return {
-          success: false,
-          message: '只允许上传 JPG、PNG、GIF 格式的图片'
-        };
-      }
-
-      // 检查文件大小 (5MB)
-      const fileData = file.data || fs.readFileSync(file.filename);
-      if (fileData.length > 5 * 1024 * 1024) {
-        return {
-          success: false,
-          message: '文件大小不能超过5MB'
-        };
-      }
-
-      // 创建上传目录
-      const uploadDir = path.join(process.cwd(), 'uploads', 'avatars');
-      if (!fs.existsSync(uploadDir)) {
-        fs.mkdirSync(uploadDir, { recursive: true });
-      }
-
-      // 生成文件名
-      const ext = path.extname(file.filename);
-      const filename = `${decoded.userId}_${Date.now()}${ext}`;
-      const filepath = path.join(uploadDir, filename);
-
-      // 保存文件
-      if (file.data) {
-        fs.writeFileSync(filepath, file.data);
-      } else {
-        // 如果是stream模式，复制文件
-        fs.copyFileSync(file.filename, filepath);
-      }
-
-      console.log('文件保存成功：', filepath);
-
-      // 更新用户头像
-      const avatarUrl = `/uploads/avatars/${filename}`;
-      const result = await this.userService.updateAvatar(decoded.userId, avatarUrl);
-      
+      const result = await this.userService.updateProfile(token, userData);
       return result;
     } catch (error) {
-      console.error('头像上传失败：', error);
       return {
         success: false,
-        message: '上传头像失败：' + error.message
+        message: '更新用户信息失败：' + error.message
       };
     }
   }

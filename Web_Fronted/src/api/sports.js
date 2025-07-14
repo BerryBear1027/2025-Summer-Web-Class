@@ -1,4 +1,5 @@
 import api from './index';
+import { tokenManager } from './auth';
 
 // 体育活动相关API
 export const sportsAPI = {
@@ -6,7 +7,7 @@ export const sportsAPI = {
   
   // 创建活动
   createActivity: (activityData) => {
-    const token = localStorage.getItem('token');
+    const token = tokenManager.getToken();
     return api.post('/sports/activities', activityData, {
       headers: {
         'Authorization': `Bearer ${token}`
@@ -26,7 +27,7 @@ export const sportsAPI = {
 
   // 报名参加活动
   joinActivity: (id) => {
-    const token = localStorage.getItem('token');
+    const token = tokenManager.getToken();
     return api.post(`/sports/activities/${id}/join`, {}, {
       headers: {
         'Authorization': `Bearer ${token}`
@@ -36,7 +37,7 @@ export const sportsAPI = {
 
   // 取消报名
   leaveActivity: (id) => {
-    const token = localStorage.getItem('token');
+    const token = tokenManager.getToken();
     return api.post(`/sports/activities/${id}/leave`, {}, {
       headers: {
         'Authorization': `Bearer ${token}`
@@ -46,7 +47,7 @@ export const sportsAPI = {
 
   // 解散活动
   cancelActivity: (id) => {
-    const token = localStorage.getItem('token');
+    const token = tokenManager.getToken();
     return api.delete(`/sports/activities/${id}`, {
       headers: {
         'Authorization': `Bearer ${token}`
@@ -63,7 +64,7 @@ export const sportsAPI = {
 
   // 创建场馆
   createVenue: (venueData) => {
-    const token = localStorage.getItem('token');
+    const token = tokenManager.getToken();
     return api.post('/sports/venues', venueData, {
       headers: {
         'Authorization': `Bearer ${token}`
@@ -83,7 +84,7 @@ export const sportsAPI = {
 
   // 删除场馆
   deleteVenue: (id) => {
-    const token = localStorage.getItem('token');
+    const token = tokenManager.getToken();
     return api.delete(`/sports/venues/${id}`, {
       headers: {
         'Authorization': `Bearer ${token}`
@@ -100,7 +101,7 @@ export const sportsAPI = {
 
   // 创建预约
   createBooking: (bookingData) => {
-    const token = localStorage.getItem('token');
+    const token = tokenManager.getToken();
     return api.post('/sports/bookings', bookingData, {
       headers: {
         'Authorization': `Bearer ${token}`
@@ -110,7 +111,7 @@ export const sportsAPI = {
 
   // 取消预约
   cancelBooking: (id) => {
-    const token = localStorage.getItem('token');
+    const token = tokenManager.getToken();
     return api.delete(`/sports/bookings/${id}`, {
       headers: {
         'Authorization': `Bearer ${token}`
@@ -120,7 +121,7 @@ export const sportsAPI = {
 
   // 获取用户预约记录
   getUserBookings: () => {
-    const token = localStorage.getItem('token');
+    const token = tokenManager.getToken();
     return api.get('/sports/my-bookings', {
       headers: {
         'Authorization': `Bearer ${token}`
@@ -132,7 +133,7 @@ export const sportsAPI = {
 
   // 添加评论
   createComment: (commentData) => {
-    const token = localStorage.getItem('token');
+    const token = tokenManager.getToken();
     return api.post('/sports/comments', commentData, {
       headers: {
         'Authorization': `Bearer ${token}`
@@ -147,7 +148,7 @@ export const sportsAPI = {
 
   // 删除评论
   deleteComment: (commentId) => {
-    const token = localStorage.getItem('token');
+    const token = tokenManager.getToken();
     return api.delete(`/sports/comments/${commentId}`, {
       headers: {
         'Authorization': `Bearer ${token}`
@@ -159,7 +160,7 @@ export const sportsAPI = {
 
   // 获取用户参与的活动
   getUserActivities: () => {
-    const token = localStorage.getItem('token');
+    const token = tokenManager.getToken();
     return api.get('/sports/my-activities', {
       headers: {
         'Authorization': `Bearer ${token}`
@@ -169,7 +170,7 @@ export const sportsAPI = {
 
   // 获取用户的预约记录
   getUserBookings: () => {
-    const token = localStorage.getItem('token');
+    const token = tokenManager.getToken();
     return api.get('/sports/my-bookings', {
       headers: {
         'Authorization': `Bearer ${token}`
@@ -179,7 +180,7 @@ export const sportsAPI = {
 
   // 获取用户发布的内容
   getUserPublications: () => {
-    const token = localStorage.getItem('token');
+    const token = tokenManager.getToken();
     return api.get('/sports/my-publications', {
       headers: {
         'Authorization': `Bearer ${token}`
@@ -191,7 +192,7 @@ export const sportsAPI = {
 
   // 上传活动/场馆图片
   uploadImage: (file) => {
-    const token = localStorage.getItem('token');
+    const token = tokenManager.getToken();
     const formData = new FormData();
     formData.append('file', file);
 

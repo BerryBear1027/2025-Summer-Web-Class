@@ -3,8 +3,10 @@ export interface IUser {
     username: string;
     email?: string;
     phone?: string;
+    bio?: string;
+    birthdate?: string;
+    gender?: string;
     password: string;
-    avatar?: string;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -14,8 +16,10 @@ export class User implements IUser {
     username: string;
     email?: string;
     phone?: string;
+    bio?: string;
+    birthdate?: string;
+    gender?: string;
     password: string;
-    avatar?: string;
     createdAt: Date;
     updatedAt: Date;
 
@@ -24,8 +28,10 @@ export class User implements IUser {
         this.username = data.username || '';
         this.email = data.email;
         this.phone = data.phone;
+        this.bio = data.bio;
+        this.birthdate = data.birthdate;
+        this.gender = data.gender;
         this.password = data.password || '';
-        this.avatar = data.avatar;
         this.createdAt = data.createdAt || new Date();
         this.updatedAt = data.updatedAt || new Date();
     }
@@ -52,12 +58,23 @@ export interface LoginUserDto {
     password: string;
 }
 
+export interface UpdateUserDto {
+    username?: string;
+    email?: string;
+    phone?: string;
+    bio?: string;
+    birthdate?: string;
+    gender?: string;
+}
+
 export interface UserResponseDto {
     id: string;
     username: string;
     email?: string;
     phone?: string;
-    avatar?: string;
+    bio?: string;
+    birthdate?: string;
+    gender?: string;
     createdAt: Date;
     updatedAt: Date;
 }
