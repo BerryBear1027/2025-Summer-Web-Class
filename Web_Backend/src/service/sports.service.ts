@@ -1,4 +1,4 @@
-import { Provide, Singleton } from '@midwayjs/core';
+import { Provide, Singleton, Inject } from '@midwayjs/core';
 import { 
   Activity, 
   Venue, 
@@ -9,10 +9,14 @@ import {
   CreateBookingDto, 
   CreateCommentDto 
 } from '../entity/sports.entity';
+import { UserService } from './user.service';
 
 @Provide()
 @Singleton()
 export class SportsService {
+  @Inject()
+  userService: UserService;
+  
   private activities: Map<string, Activity> = new Map();
   private venues: Map<string, Venue> = new Map();
   private bookings: Map<string, Booking> = new Map();
@@ -46,27 +50,61 @@ export class SportsService {
 
   // 获取所有活动
   async getAllActivities(): Promise<Activity[]> {
-    const activities = Array.from(this.activities.values())
-      .map(activity => {
-        const activityData = activity.toJSON() as Activity;
-        // 为每个活动添加参与者详细信息
-        activityData.participantDetails = activityData.participants.map(participantId => {
-          // 这里应该从用户服务获取用户信息，但现在简化处理
-          return {
-            id: participantId,
-            username: `用户${participantId.slice(-4)}` // 使用ID后4位作为临时用户名
-          };
-        });
-        return activityData;
-      })
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    return activities;
+    const activities = await Promise.all(
+      Array.from(this.activities.values())
+        .filter(activity => activity.status !== 'deleted') // 过滤已删除的活动
+        .map(async activity => {
+          const activityData = activity.toJSON() as Activity;
+          // 为每个活动添加参与者详细信息
+          const participantDetails = await Promise.all(
+            activityData.participants.map(async participantId => {
+              const user = await this.userService.getUserById(participantId);
+              return {
+                id: participantId,
+                username: user?.username || `用户${participantId.slice(-4)}`
+              };
+            })
+          );
+          activityData.participantDetails = participantDetails;
+          return activityData;
+        })
+    );
+    return activities.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
 
   // 根据ID获取活动
   async getActivityById(id: string): Promise<Activity | null> {
+    console.log('SportsService: 获取活动详情，ID:', id);
     const activity = this.activities.get(id);
-    return activity ? activity.toJSON() as Activity : null;
+    if (!activity) {
+      console.log('SportsService: 活动不存在');
+      return null;
+    }
+    
+    const activityData = activity.toJSON() as Activity;
+    console.log('SportsService: 原始活动数据:', activityData);
+    console.log('SportsService: 参与者ID列表:', activityData.participants);
+    
+    // 为活动添加参与者详细信息
+    const participantDetails = await Promise.all(
+      activityData.participants.map(async participantId => {
+        console.log('SportsService: 获取参与者信息，ID:', participantId);
+        const user = await this.userService.getUserById(participantId);
+        console.log('SportsService: 用户信息:', user);
+        const participantDetail = {
+          id: participantId,
+          username: user?.username || `用户${participantId.slice(-4)}`
+        };
+        console.log('SportsService: 参与者详情:', participantDetail);
+        return participantDetail;
+      })
+    );
+    
+    console.log('SportsService: 所有参与者详情:', participantDetails);
+    activityData.participantDetails = participantDetails;
+    console.log('SportsService: 最终活动数据:', activityData);
+    
+    return activityData;
   }
 
   // 报名参加活动
@@ -167,6 +205,40 @@ export class SportsService {
     }
   }
 
+  // 删除活动
+  async deleteActivity(activityId: string, userId: string): Promise<{ success: boolean; message: string }> {
+    try {
+      console.log('deleteActivity 调用 - activityId:', activityId, 'userId:', userId);
+      
+      const activity = this.activities.get(activityId);
+      if (!activity) {
+        console.log('活动不存在，activityId:', activityId);
+        return { success: false, message: '活动不存在' };
+      }
+
+      console.log('找到活动，publisherId:', activity.publisherId, 'userId:', userId);
+      if (activity.publisherId !== userId) {
+        return { success: false, message: '只有发布者可以删除活动' };
+      }
+
+      // 不删除活动，而是标记为已删除状态
+      activity.status = 'deleted';
+      activity.updatedAt = new Date();
+      console.log('活动标记为已删除成功');
+
+      return {
+        success: true,
+        message: '活动已删除'
+      };
+    } catch (error) {
+      console.error('删除活动异常:', error);
+      return {
+        success: false,
+        message: '删除活动失败：' + error.message
+      };
+    }
+  }
+
   // ============ 场馆管理 ============
 
   // 创建场馆
@@ -196,6 +268,7 @@ export class SportsService {
   // 获取所有场馆
   async getAllVenues(): Promise<Venue[]> {
     return Array.from(this.venues.values())
+      .filter(venue => venue.status !== 'deleted') // 过滤已删除的场馆
       .map(venue => venue.toJSON() as Venue)
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
@@ -209,27 +282,102 @@ export class SportsService {
   // 删除场馆（只有发布者可以）
   async deleteVenue(venueId: string, userId: string): Promise<{ success: boolean; message: string }> {
     try {
+      console.log('deleteVenue 调用 - venueId:', venueId, 'userId:', userId);
+      console.log('当前存储的场馆:', Array.from(this.venues.keys()));
+      
       const venue = this.venues.get(venueId);
       if (!venue) {
+        console.log('场馆不存在，venueId:', venueId);
         return { success: false, message: '场馆不存在' };
       }
 
+      console.log('找到场馆，publisherId:', venue.publisherId, 'userId:', userId);
       if (venue.publisherId !== userId) {
         return { success: false, message: '只有发布者可以删除场馆' };
       }
 
-      this.venues.delete(venueId);
+      // 不删除场馆，而是标记为已删除状态
+      venue.status = 'deleted';
+      venue.updatedAt = new Date();
+      console.log('场馆标记为已删除成功');
 
       return {
         success: true,
         message: '场馆已删除'
       };
     } catch (error) {
+      console.error('删除场馆异常:', error);
       return {
         success: false,
         message: '删除场馆失败：' + error.message
       };
     }
+  }
+
+  // 获取场馆预约信息（包括已预约时间段）
+  async getVenueBookings(venueId: string, date?: string): Promise<{ success: boolean; message: string; data?: any }> {
+    try {
+      const venue = this.venues.get(venueId);
+      if (!venue) {
+        return { success: false, message: '场馆不存在' };
+      }
+
+      let targetDate = date ? new Date(date) : new Date();
+      
+      // 获取指定日期的所有预约
+      const bookings = Array.from(this.bookings.values())
+        .filter(booking => 
+          booking.venueId === venueId && 
+          booking.bookingDate.toDateString() === targetDate.toDateString() &&
+          booking.status !== 'cancelled'
+        )
+        .map(booking => ({
+          id: booking.id,
+          startTime: booking.startTime,
+          endTime: booking.endTime,
+          status: booking.status,
+          userName: booking.userName
+        }))
+        .sort((a, b) => this.timeStringToMinutes(a.startTime) - this.timeStringToMinutes(b.startTime));
+
+      // 生成可用时间段
+      const availableSlots = this.generateAvailableSlots(venue.availableHours, bookings);
+
+      return {
+        success: true,
+        message: '获取预约信息成功',
+        data: {
+          venue: {
+            id: venue.id,
+            name: venue.name,
+            availableHours: venue.availableHours,
+            price: venue.price
+          },
+          date: targetDate.toDateString(),
+          bookings: bookings,
+          availableSlots: availableSlots
+        }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: '获取预约信息失败：' + error.message
+      };
+    }
+  }
+
+  // 生成可用时间段
+  private generateAvailableSlots(availableHours: string[], bookings: any[]): string[] {
+    return availableHours.filter(hour => {
+      // 检查这个时间段是否被预约
+      const isBooked = bookings.some(booking => {
+        const bookingStart = this.timeStringToMinutes(booking.startTime);
+        const bookingEnd = this.timeStringToMinutes(booking.endTime);
+        const hourMinutes = this.timeStringToMinutes(hour);
+        return hourMinutes >= bookingStart && hourMinutes < bookingEnd;
+      });
+      return !isBooked;
+    });
   }
 
   // ============ 预约管理 ============
@@ -244,6 +392,21 @@ export class SportsService {
 
       if (venue.status !== 'available') {
         return { success: false, message: '场馆当前不可预约' };
+      }
+
+      // 检查预约时间是否在场馆可用时间内
+      if (!venue.availableHours.includes(bookingData.startTime)) {
+        return { 
+          success: false, 
+          message: `预约开始时间不在场馆可用时间内，可用时间: ${venue.availableHours.join(', ')}` 
+        };
+      }
+
+      // 检查预约时间是否为整点
+      const startTime = bookingData.startTime.split(':');
+      const endTime = bookingData.endTime.split(':');
+      if (startTime[1] !== '00' || endTime[1] !== '00') {
+        return { success: false, message: '预约时间必须为整点（如：14:00-16:00）' };
       }
 
       // 检查时间冲突
@@ -264,7 +427,7 @@ export class SportsService {
       });
 
       if (hasConflict) {
-        return { success: false, message: '该时间段已被预约，请选择其他时间' };
+        return { success: false, message: '当前时间段已经被预约！' };
       }
 
       const booking = new Booking({
@@ -319,11 +482,21 @@ export class SportsService {
   }
 
   // 获取用户的预约记录
-  async getUserBookings(userId: string): Promise<Booking[]> {
-    return Array.from(this.bookings.values())
+  async getUserBookings(userId: string): Promise<any[]> {
+    const bookings = Array.from(this.bookings.values())
       .filter(booking => booking.userId === userId)
-      .map(booking => booking.toJSON() as Booking)
+      .map(booking => {
+        const bookingData = booking.toJSON();
+        // 添加场馆信息
+        const venue = this.venues.get(booking.venueId);
+        if (venue) {
+          (bookingData as any).venue = venue.toJSON();
+        }
+        return bookingData;
+      })
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    
+    return bookings;
   }
 
   // ============ 评论管理 ============
@@ -424,16 +597,24 @@ export class SportsService {
   }
 
   // 获取用户发布的内容
-  async getUserPublications(userId: string): Promise<{ activities: Activity[]; venues: Venue[] }> {
+  async getUserPublications(userId: string): Promise<any[]> {
     const activities = Array.from(this.activities.values())
       .filter(activity => activity.publisherId === userId)
-      .map(activity => activity.toJSON() as Activity);
+      .map(activity => ({
+        ...activity.toJSON(),
+        type: 'activity'
+      }));
 
     const venues = Array.from(this.venues.values())
       .filter(venue => venue.publisherId === userId)
-      .map(venue => venue.toJSON() as Venue);
+      .map(venue => ({
+        ...venue.toJSON(),
+        type: 'venue'
+      }));
 
-    return { activities, venues };
+    // 合并并按创建时间排序
+    const allPublications = [...activities, ...venues];
+    return allPublications.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
 
   // ============ 辅助方法 ============

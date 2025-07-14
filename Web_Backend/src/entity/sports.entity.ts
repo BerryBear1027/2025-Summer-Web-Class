@@ -11,7 +11,7 @@ export interface IActivity {
   image?: string;
   publisherId: string;
   publisherName: string;
-  status: 'recruiting' | 'full' | 'ongoing' | 'completed' | 'cancelled';
+  status: 'recruiting' | 'full' | 'ongoing' | 'completed' | 'cancelled' | 'deleted';
   participants: string[]; // 参与者用户ID数组
   participantDetails?: Array<{id: string; username: string}>; // 参与者详细信息
   createdAt: Date;
@@ -30,7 +30,7 @@ export class Activity implements IActivity {
   image?: string;
   publisherId: string;
   publisherName: string;
-  status: 'recruiting' | 'full' | 'ongoing' | 'completed' | 'cancelled';
+  status: 'recruiting' | 'full' | 'ongoing' | 'completed' | 'cancelled' | 'deleted';
   participants: string[];
   participantDetails?: Array<{id: string; username: string}>;
   createdAt: Date;
@@ -87,15 +87,13 @@ export interface IVenue {
   description?: string;
   location: string;
   sportType: string; // 运动类型：篮球、足球、羽毛球等
-  availableTime: {
-    start: string; // 格式: "09:00"
-    end: string;   // 格式: "22:00"
-  };
+  capacity?: number; // 容量
+  availableHours: string[]; // 可用小时，如 ["09:00", "10:00", "11:00", "14:00", "15:00"]
   price?: number; // 每小时价格
   image?: string;
   publisherId: string;
   publisherName: string;
-  status: 'available' | 'maintenance' | 'closed';
+  status: 'available' | 'maintenance' | 'closed' | 'deleted';
   bookings: string[]; // 预约记录ID数组
   createdAt: Date;
   updatedAt: Date;
@@ -107,12 +105,13 @@ export class Venue implements IVenue {
   description?: string;
   location: string;
   sportType: string;
-  availableTime: { start: string; end: string; };
+  capacity?: number;
+  availableHours: string[];
   price?: number;
   image?: string;
   publisherId: string;
   publisherName: string;
-  status: 'available' | 'maintenance' | 'closed';
+  status: 'available' | 'maintenance' | 'closed' | 'deleted';
   bookings: string[];
   createdAt: Date;
   updatedAt: Date;
@@ -123,7 +122,8 @@ export class Venue implements IVenue {
     this.description = data.description;
     this.location = data.location || '';
     this.sportType = data.sportType || '';
-    this.availableTime = data.availableTime || { start: '09:00', end: '18:00' };
+    this.capacity = data.capacity;
+    this.availableHours = data.availableHours || ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
     this.price = data.price;
     this.image = data.image;
     this.publisherId = data.publisherId || '';
@@ -145,7 +145,8 @@ export class Venue implements IVenue {
       description: this.description,
       location: this.location,
       sportType: this.sportType,
-      availableTime: this.availableTime,
+      capacity: this.capacity,
+      availableHours: this.availableHours,
       price: this.price,
       image: this.image,
       publisherId: this.publisherId,

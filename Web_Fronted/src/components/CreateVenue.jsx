@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { sportsAPI } from '../api/sports';
 import './CreateVenue.css';
 
@@ -7,10 +7,11 @@ const CreateVenue = ({ user, onBack, onSuccess }) => {
     name: '',
     description: '',
     type: '',
-    address: '',
+    location: '',
     capacity: '',
     price: '',
-    sportType: ''
+    sportType: '',
+    availableHours: []
   });
   const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -26,6 +27,16 @@ const CreateVenue = ({ user, onBack, onSuccess }) => {
     '篮球', '足球', '羽毛球', '乒乓球', '网球', '排球',
     '游泳', '健身', '瑜伽', '舞蹈', '跑步', '其他'
   ];
+
+  // 24小时时间段选项
+  const timeOptions = Array.from({ length: 24 }, (_, i) => {
+    const startHour = i.toString().padStart(2, '0');
+    const endHour = ((i + 1) % 24).toString().padStart(2, '0');
+    return {
+      value: `${startHour}:00`,
+      label: `${startHour}:00-${endHour}:00`
+    };
+  });
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -56,6 +67,27 @@ const CreateVenue = ({ user, onBack, onSuccess }) => {
     }
   };
 
+  const handleTimeSelection = (timeSlot) => {
+    // 检查是否为已过去的时间段
+    const currentHour = new Date().getHours();
+    const slotHour = parseInt(timeSlot.value.split(':')[0]);
+    
+    if (slotHour <= currentHour) {
+      setError('不能选择已过去的时间段');
+      return;
+    }
+    
+    setFormData(prev => ({
+      ...prev,
+      availableHours: prev.availableHours.includes(timeSlot.value)
+        ? prev.availableHours.filter(h => h !== timeSlot.value)
+        : [...prev.availableHours, timeSlot.value].sort()
+    }));
+    
+    // 清除错误信息
+    setError('');
+  };
+
   const validateForm = () => {
     if (!formData.name.trim()) {
       setError('请输入场馆名称');
@@ -72,7 +104,7 @@ const CreateVenue = ({ user, onBack, onSuccess }) => {
       return false;
     }
 
-    if (!formData.address.trim()) {
+    if (!formData.location.trim()) {
       setError('请输入场馆地址');
       return false;
     }
@@ -91,6 +123,32 @@ const CreateVenue = ({ user, onBack, onSuccess }) => {
       setError('请选择运动类型');
       return false;
     }
+
+    if (!formData.availableHours || formData.availableHours.length === 0) {
+      setError('请选择至少一个可用时间段');
+      return false;
+    }
+
+    // 检查是否为当天发布
+    const today = new Date();
+    const currentHour = today.getHours();
+    
+    // 过滤掉已经过去的时间段
+    const validTimeSlots = formData.availableHours.filter(hour => {
+      const hourValue = parseInt(hour.split(':')[0]);
+      return hourValue > currentHour;
+    });
+
+    if (validTimeSlots.length === 0) {
+      setError('所选时间段已过去，请选择当前时间之后的时间段');
+      return false;
+    }
+
+    // 更新formData中的可用时间为有效时间段
+    setFormData(prev => ({
+      ...prev,
+      availableHours: validTimeSlots
+    }));
 
     return true;
   };
@@ -125,6 +183,7 @@ const CreateVenue = ({ user, onBack, onSuccess }) => {
         ...formData,
         capacity: parseInt(formData.capacity),
         price: parseFloat(formData.price),
+        availableHours: formData.availableHours,
         image: imageUrl
       };
 
@@ -143,6 +202,22 @@ const CreateVenue = ({ user, onBack, onSuccess }) => {
       setLoading(false);
     }
   };
+
+  // 组件加载时清除已过去的时间段
+  useEffect(() => {
+    const currentHour = new Date().getHours();
+    const validHours = formData.availableHours.filter(hour => {
+      const hourValue = parseInt(hour.split(':')[0]);
+      return hourValue > currentHour;
+    });
+    
+    if (validHours.length !== formData.availableHours.length) {
+      setFormData(prev => ({
+        ...prev,
+        availableHours: validHours
+      }));
+    }
+  }, []);
 
   return (
     <div className="create-venue-container">
@@ -225,12 +300,12 @@ const CreateVenue = ({ user, onBack, onSuccess }) => {
             <h3>地址信息</h3>
             
             <div className="form-group">
-              <label htmlFor="address">场馆地址 *</label>
+              <label htmlFor="location">场馆地址 *</label>
               <input
                 type="text"
-                id="address"
-                name="address"
-                value={formData.address}
+                id="location"
+                name="location"
+                value={formData.location}
                 onChange={handleInputChange}
                 placeholder="输入详细地址"
                 required
@@ -271,6 +346,47 @@ const CreateVenue = ({ user, onBack, onSuccess }) => {
                   required
                 />
               </div>
+            </div>
+
+            <div className="form-group full-width">
+              <label>可用时间段 *</label>
+              <div className="time-restriction-notice">
+                <strong>注意：只可发布当天场馆！</strong>
+                <p>已过去的时间段将被自动禁用，请选择当前时间之后的时间段。</p>
+              </div>
+              <div className="time-selection-grid">
+                {timeOptions.map(timeSlot => {
+                  const currentHour = new Date().getHours();
+                  const slotHour = parseInt(timeSlot.value.split(':')[0]);
+                  const isPastTime = slotHour <= currentHour;
+                  
+                  return (
+                    <label 
+                      key={timeSlot.value} 
+                      className={`time-option ${isPastTime ? 'disabled' : ''}`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={formData.availableHours.includes(timeSlot.value)}
+                        onChange={() => handleTimeSelection(timeSlot)}
+                        disabled={isPastTime}
+                      />
+                      <span className="time-label">
+                        {timeSlot.label}
+                        {isPastTime && <small> (已过去)</small>}
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+              {formData.availableHours.length > 0 && (
+                <div className="selected-times">
+                  已选择: {formData.availableHours.map(hour => {
+                    const slot = timeOptions.find(t => t.value === hour);
+                    return slot ? slot.label : hour;
+                  }).join(', ')}
+                </div>
+              )}
             </div>
           </div>
 

@@ -74,7 +74,10 @@ export class SportsController {
   @Get('/activities/:id')
   async getActivityById(@Param('id') id: string) {
     try {
+      console.log('获取活动详情，ID:', id);
       const activity = await this.sportsService.getActivityById(id);
+      console.log('Service返回的活动数据:', activity);
+      
       if (!activity) {
         return {
           success: false,
@@ -82,12 +85,16 @@ export class SportsController {
         };
       }
 
+      console.log('活动参与者详情:', activity.participantDetails);
+      console.log('活动参与者ID列表:', activity.participants);
+
       return {
         success: true,
         message: '获取活动详情成功',
         data: activity
       };
     } catch (error) {
+      console.error('获取活动详情异常:', error);
       return {
         success: false,
         message: '获取活动详情失败：' + error.message
@@ -136,6 +143,21 @@ export class SportsController {
       return {
         success: false,
         message: '解散活动失败：' + error.message
+      };
+    }
+  }
+
+  // 删除活动
+  @Del('/activities/:id/delete')
+  async deleteActivity(@Param('id') activityId: string, @Headers('authorization') authorization: string) {
+    try {
+      const user = await this.getUserFromToken(authorization);
+      const result = await this.sportsService.deleteActivity(activityId, user.id);
+      return result;
+    } catch (error) {
+      return {
+        success: false,
+        message: '删除活动失败：' + error.message
       };
     }
   }
@@ -227,9 +249,12 @@ export class SportsController {
   async deleteVenue(@Param('id') venueId: string, @Headers('authorization') authorization: string) {
     try {
       const user = await this.getUserFromToken(authorization);
+      console.log('删除场馆请求 - venueId:', venueId, 'userId:', user.id);
       const result = await this.sportsService.deleteVenue(venueId, user.id);
+      console.log('删除场馆结果:', result);
       return result;
     } catch (error) {
+      console.error('删除场馆错误:', error);
       return {
         success: false,
         message: '删除场馆失败：' + error.message
@@ -302,6 +327,20 @@ export class SportsController {
       return {
         success: false,
         message: '获取预约记录失败：' + error.message
+      };
+    }
+  }
+
+  // 获取场馆预约信息
+  @Get('/venues/:id/bookings')
+  async getVenueBookings(@Param('id') venueId: string, @Query('date') date?: string) {
+    try {
+      const result = await this.sportsService.getVenueBookings(venueId, date);
+      return result;
+    } catch (error) {
+      return {
+        success: false,
+        message: '获取预约信息失败：' + error.message
       };
     }
   }

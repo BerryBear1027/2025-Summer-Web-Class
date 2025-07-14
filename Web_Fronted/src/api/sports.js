@@ -55,6 +55,16 @@ export const sportsAPI = {
     });
   },
 
+  // 删除活动
+  deleteActivity: (id) => {
+    const token = tokenManager.getToken();
+    return api.delete(`/sports/activities/${id}/delete`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+  },
+
   // 搜索活动
   searchActivities: (keyword) => {
     return api.get(`/sports/activities/search?keyword=${encodeURIComponent(keyword || '')}`);
@@ -127,6 +137,12 @@ export const sportsAPI = {
         'Authorization': `Bearer ${token}`
       }
     });
+  },
+
+  // 获取场馆预约信息
+  getVenueBookings: (venueId, date) => {
+    const params = date ? `?date=${encodeURIComponent(date)}` : '';
+    return api.get(`/sports/venues/${venueId}/bookings${params}`);
   },
 
   // ============ 评论相关 ============

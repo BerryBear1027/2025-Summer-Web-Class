@@ -66,15 +66,44 @@ const History = ({ user, onBack, onNavigate }) => {
 
   const getStatusColor = (status) => {
     switch (status) {
+      case 'recruiting':
+      case 'available':
       case 'active':
       case 'confirmed':
         return '#2ed573';
+      case 'full':
+      case 'ongoing':
+        return '#3742fa';
       case 'completed':
         return '#747d8c';
       case 'cancelled':
+      case 'deleted':
+      case 'closed':
         return '#ff4757';
+      case 'pending':
+        return '#ffa502';
+      case 'maintenance':
+        return '#ff6348';
       default:
         return '#666';
+    }
+  };
+
+  const getStatusText = (status, type = '') => {
+    switch (status) {
+      case 'recruiting': return '招募中';
+      case 'full': return '已满员';
+      case 'ongoing': return '进行中';
+      case 'completed': return '已结束';
+      case 'cancelled': return '已取消';
+      case 'deleted': return '已删除';
+      case 'available': return '可用';
+      case 'maintenance': return '维护中';
+      case 'closed': return '已关闭';
+      case 'pending': return '待确认';
+      case 'confirmed': return '已确认';
+      case 'active': return '活跃';
+      default: return status || '未知状态';
     }
   };
 
@@ -129,19 +158,30 @@ const History = ({ user, onBack, onNavigate }) => {
                 data.activities.map((activity) => (
                   <div key={activity.id} className="history-item activity-item">
                     <div className="item-header">
-                      <h3 onClick={() => onNavigate('activity-detail', activity)}>
-                        {activity.name}
-                      </h3>
-                      <span 
-                        className="status"
-                        style={{ backgroundColor: getStatusColor(activity.status) }}
+                      <h3 
+                        onClick={() => activity.status !== 'deleted' && onNavigate('activity-detail', activity)}
+                        className={`clickable-title ${activity.status === 'deleted' ? 'deleted-item' : ''}`}
+                        title={activity.status === 'deleted' ? '活动已被删除' : "点击查看活动详情"}
                       >
-                        {activity.status === 'recruiting' ? '招募中' : 
-                         activity.status === 'full' ? '已满员' :
-                         activity.status === 'ongoing' ? '进行中' :
-                         activity.status === 'completed' ? '已结束' :
-                         activity.status === 'cancelled' ? '已取消' : activity.status}
-                      </span>
+                        {activity.name}
+                        {activity.status === 'deleted' && <span className="deleted-tag">（已删除）</span>}
+                      </h3>
+                      <div className="item-actions">
+                        <span 
+                          className="status"
+                          style={{ backgroundColor: getStatusColor(activity.status) }}
+                        >
+                          {getStatusText(activity.status)}
+                        </span>
+                        {activity.status !== 'deleted' && (
+                          <button 
+                            onClick={() => onNavigate('activity-detail', activity)}
+                            className="view-detail-btn"
+                          >
+                            查看详情
+                          </button>
+                        )}
+                      </div>
                     </div>
                     <div className="item-content">
                       <div className="item-info">
@@ -183,15 +223,20 @@ const History = ({ user, onBack, onNavigate }) => {
                 data.bookings.map((booking) => (
                   <div key={booking.id} className="history-item booking-item">
                     <div className="item-header">
-                      <h3 onClick={() => onNavigate('venue-detail', booking.venue)}>
-                        {booking.venue.name}
+                      <h3 
+                        onClick={() => booking.venue && booking.venue.status !== 'deleted' && onNavigate('venue-detail', booking.venue)}
+                        className={`clickable-title ${!booking.venue || booking.venue.status === 'deleted' ? 'deleted-item' : ''}`}
+                        title={!booking.venue || booking.venue.status === 'deleted' ? '场馆已被删除' : "点击查看场馆详情"}
+                      >
+                        {booking.venue?.name || booking.venueName || '未知场馆'}
+                        {(!booking.venue || booking.venue.status === 'deleted') && <span className="deleted-tag">（已删除）</span>}
                       </h3>
                       <div className="booking-actions">
                         <span 
                           className="status"
                           style={{ backgroundColor: getStatusColor(booking.status) }}
                         >
-                          {booking.status}
+                          {getStatusText(booking.status)}
                         </span>
                         {booking.status === 'confirmed' && (
                           <button 
@@ -201,20 +246,32 @@ const History = ({ user, onBack, onNavigate }) => {
                             取消预约
                           </button>
                         )}
+                        {booking.venue && booking.venue.status !== 'deleted' && (
+                          <button 
+                            onClick={() => onNavigate('venue-detail', booking.venue)}
+                            className="view-detail-btn"
+                          >
+                            查看场馆
+                          </button>
+                        )}
                       </div>
                     </div>
                     <div className="item-content">
                       <div className="item-info">
                         <span className="info-label">地址：</span>
-                        <span>{booking.venue.address}</span>
+                        <span>{booking.venue?.location || booking.venue?.address || '地址未知'}</span>
+                      </div>
+                      <div className="item-info">
+                        <span className="info-label">预约日期：</span>
+                        <span>{booking.bookingDate ? new Date(booking.bookingDate).toLocaleDateString('zh-CN') : '日期未知'}</span>
                       </div>
                       <div className="item-info">
                         <span className="info-label">预约时间：</span>
-                        <span>{formatDate(booking.startTime)} - {formatDate(booking.endTime)}</span>
+                        <span>{booking.startTime} - {booking.endTime}</span>
                       </div>
                       <div className="item-info">
                         <span className="info-label">费用：</span>
-                        <span>¥{booking.totalPrice}</span>
+                        <span>¥{booking.totalPrice || 0}</span>
                       </div>
                       <div className="item-info">
                         <span className="info-label">预约时间：</span>
@@ -235,11 +292,16 @@ const History = ({ user, onBack, onNavigate }) => {
                 data.publications.map((item) => (
                   <div key={`${item.type}-${item.id}`} className="history-item publication-item">
                     <div className="item-header">
-                      <h3 onClick={() => onNavigate(
-                        item.type === 'activity' ? 'activity-detail' : 'venue-detail', 
-                        item
-                      )}>
+                      <h3 
+                        onClick={() => item.status !== 'deleted' && onNavigate(
+                          item.type === 'activity' ? 'activity-detail' : 'venue-detail', 
+                          item
+                        )}
+                        className={`clickable-title ${item.status === 'deleted' ? 'deleted-item' : ''}`}
+                        title={item.status === 'deleted' ? `${item.type === 'activity' ? '活动' : '场馆'}已被删除` : "点击查看详情"}
+                      >
                         {item.title || item.name}
+                        {item.status === 'deleted' && <span className="deleted-tag">（已删除）</span>}
                       </h3>
                       <div className="publication-info">
                         <span className="publication-type">{item.type === 'activity' ? '活动' : '场馆'}</span>
@@ -247,39 +309,64 @@ const History = ({ user, onBack, onNavigate }) => {
                           className="status"
                           style={{ backgroundColor: getStatusColor(item.status) }}
                         >
-                          {item.status}
+                          {getStatusText(item.status, item.type)}
                         </span>
+                        {item.status !== 'deleted' && (
+                          <button 
+                            onClick={() => onNavigate(
+                              item.type === 'activity' ? 'activity-detail' : 'venue-detail', 
+                              item
+                            )}
+                            className="view-detail-btn"
+                          >
+                            查看详情
+                          </button>
+                        )}
                       </div>
                     </div>
                     <div className="item-content">
                       {item.type === 'activity' ? (
                         <>
                           <div className="item-info">
-                            <span className="info-label">类型：</span>
-                            <span>{item.type}</span>
+                            <span className="info-label">活动类型：</span>
+                            <span>{item.activityType || item.type || '活动'}</span>
                           </div>
                           <div className="item-info">
-                            <span className="info-label">地点：</span>
+                            <span className="info-label">活动地点：</span>
                             <span>{item.location}</span>
                           </div>
                           <div className="item-info">
                             <span className="info-label">参与人数：</span>
-                            <span>{item.participants?.length || 0}/{item.maxParticipants}</span>
+                            <span>{item.participants?.length || 0}/{item.maxParticipants}人</span>
+                          </div>
+                          <div className="item-info">
+                            <span className="info-label">开始时间：</span>
+                            <span>{formatDate(item.startTime)}</span>
                           </div>
                         </>
                       ) : (
                         <>
                           <div className="item-info">
-                            <span className="info-label">地址：</span>
-                            <span>{item.address}</span>
+                            <span className="info-label">场馆地址：</span>
+                            <span>{item.location}</span>
                           </div>
                           <div className="item-info">
-                            <span className="info-label">容量：</span>
-                            <span>{item.capacity}人</span>
+                            <span className="info-label">运动类型：</span>
+                            <span>{item.sportType}</span>
+                          </div>
+                          <div className="item-info">
+                            <span className="info-label">开放时间：</span>
+                            <span>{item.availableHours ? 
+                              item.availableHours.map(hour => {
+                                const startHour = hour.split(':')[0];
+                                const endHour = (parseInt(startHour) + 1).toString().padStart(2, '0');
+                                return `${hour}-${endHour}:00`;
+                              }).slice(0, 3).join(', ') + (item.availableHours.length > 3 ? '...' : '')
+                              : '时间待定'}</span>
                           </div>
                           <div className="item-info">
                             <span className="info-label">价格：</span>
-                            <span>¥{item.price}/小时</span>
+                            <span>{item.price ? `¥${item.price}/小时` : '价格面议'}</span>
                           </div>
                         </>
                       )}

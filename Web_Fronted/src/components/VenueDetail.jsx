@@ -8,14 +8,23 @@ const VenueDetail = ({ venue, user, onBack, onNavigate }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [bookingForm, setBookingForm] = useState({
-    startTime: '',
-    endTime: '',
+    selectedTimeSlot: '',
     show: false
   });
+  const [venueBookings, setVenueBookings] = useState(null);
+  const [availableSlots, setAvailableSlots] = useState([]);
 
   useEffect(() => {
     loadComments();
   }, [venue.id]);
+
+  useEffect(() => {
+    if (bookingForm.show) {
+      // 只加载今天的预约信息
+      const today = new Date().toISOString().split('T')[0];
+      loadVenueBookings(today);
+    }
+  }, [bookingForm.show]);
 
   const loadComments = async () => {
     try {
@@ -28,18 +37,37 @@ const VenueDetail = ({ venue, user, onBack, onNavigate }) => {
     }
   };
 
+  const loadVenueBookings = async (date) => {
+    try {
+      const response = await sportsAPI.getVenueBookings(venue.id, date);
+      if (response.data.success) {
+        setVenueBookings(response.data.data);
+        setAvailableSlots(response.data.data.availableSlots || []);
+      }
+    } catch (error) {
+      console.error('加载预约信息失败：', error);
+    }
+  };
+
   const handleDeleteVenue = async () => {
     if (!window.confirm('确定要删除这个场馆吗？此操作不可撤销！')) return;
 
+    console.log('准备删除场馆，venue ID:', venue.id, 'user ID:', user.id);
     setLoading(true);
     setError('');
     try {
       const response = await sportsAPI.deleteVenue(venue.id);
-      if (response.data.success) {
+      console.log('删除场馆响应：', response);
+      
+      // 检查响应结构，可能是 response.success 或 response.data.success
+      const success = response.success || (response.data && response.data.success);
+      const message = response.message || (response.data && response.data.message);
+      
+      if (success) {
         alert('场馆已删除');
         onBack();
       } else {
-        setError(response.data.message || '删除场馆失败');
+        setError(message || '删除场馆失败');
       }
     } catch (error) {
       console.error('删除场馆失败：', error);
@@ -50,20 +78,16 @@ const VenueDetail = ({ venue, user, onBack, onNavigate }) => {
   };
 
   const handleBookVenue = async () => {
-    if (!bookingForm.startTime || !bookingForm.endTime) {
-      setError('请选择预约时间');
+    if (!bookingForm.selectedTimeSlot) {
+      setError('请选择预约时间段');
       return;
     }
 
-    const startTime = new Date(bookingForm.startTime);
-    const endTime = new Date(bookingForm.endTime);
-
-    if (startTime >= endTime) {
-      setError('结束时间必须晚于开始时间');
-      return;
-    }
-
-    if (startTime < new Date()) {
+    const [startTime, endTime] = bookingForm.selectedTimeSlot.split('-');
+    const currentHour = new Date().getHours();
+    const selectedHour = parseInt(startTime.split(':')[0]);
+    
+    if (selectedHour <= currentHour) {
       setError('预约时间不能早于当前时间');
       return;
     }
@@ -71,17 +95,32 @@ const VenueDetail = ({ venue, user, onBack, onNavigate }) => {
     setLoading(true);
     setError('');
     try {
+      const today = new Date().toISOString().split('T')[0];
       const response = await sportsAPI.createBooking({
         venueId: venue.id,
-        startTime: bookingForm.startTime,
-        endTime: bookingForm.endTime
+        bookingDate: today,
+        startTime: startTime,
+        endTime: endTime
       });
 
-      if (response.data.success) {
+      console.log('预约响应：', response);
+      
+      // 检查响应结构，可能是 response.success 或 response.data.success
+      const success = response.success || (response.data && response.data.success);
+      const message = response.message || (response.data && response.data.message);
+      
+      if (success) {
         alert('预约成功！');
-        setBookingForm({ startTime: '', endTime: '', show: false });
+        setBookingForm({ selectedTimeSlot: '', show: false });
+        // 重新加载今天的预约信息
+        loadVenueBookings(today);
       } else {
-        setError(response.data.message || '预约失败');
+        // 针对时间段冲突的特殊处理
+        if (message && (message.includes('已被预约') || message.includes('时间段冲突') || message.includes('该时间段'))) {
+          setError('当前时间段已经被预约！');
+        } else {
+          setError(message || '预约失败');
+        }
       }
     } catch (error) {
       console.error('预约失败：', error);
@@ -120,7 +159,7 @@ const VenueDetail = ({ venue, user, onBack, onNavigate }) => {
     return new Date(dateString).toLocaleString('zh-CN');
   };
 
-  const isCreator = venue.creatorId === user.id;
+  const isCreator = venue.publisherId === user.id;
 
   // 获取今天的日期字符串，用于设置最小时间
   const today = new Date().toISOString().slice(0, 16);
@@ -152,7 +191,7 @@ const VenueDetail = ({ venue, user, onBack, onNavigate }) => {
             <div className="info-grid">
               <div className="info-item">
                 <span className="label">地址：</span>
-                <span>{venue.address}</span>
+                <span>{venue.location}</span>
               </div>
               <div className="info-item">
                 <span className="label">容量：</span>
@@ -168,7 +207,7 @@ const VenueDetail = ({ venue, user, onBack, onNavigate }) => {
               </div>
               <div className="info-item">
                 <span className="label">发布者：</span>
-                <span>{venue.creatorName}</span>
+                <span>{venue.publisherName}</span>
               </div>
               <div className="info-item">
                 <span className="label">发布时间：</span>
@@ -204,36 +243,71 @@ const VenueDetail = ({ venue, user, onBack, onNavigate }) => {
                 ) : (
                   <div className="booking-form">
                     <h4>预约时间</h4>
+                    <div className="venue-time-info">
+                      <p className="today-booking-notice">⚡ 只能预约当天时间段</p>
+                      <p>可用时间段：{venue.availableHours?.map(hour => {
+                        const startHour = hour.split(':')[0];
+                        const endHour = (parseInt(startHour) + 1).toString().padStart(2, '0');
+                        return `${hour}-${endHour}:00`;
+                      }).join(', ') || '暂无设置'}</p>
+                      <p>价格：¥{venue.price || 0}/小时</p>
+                    </div>
+                    
                     <div className="time-inputs">
                       <div className="input-group">
-                        <label>开始时间：</label>
-                        <input
-                          type="datetime-local"
-                          value={bookingForm.startTime}
-                          min={today}
-                          onChange={(e) => setBookingForm({ ...bookingForm, startTime: e.target.value })}
-                        />
-                      </div>
-                      <div className="input-group">
-                        <label>结束时间：</label>
-                        <input
-                          type="datetime-local"
-                          value={bookingForm.endTime}
-                          min={bookingForm.startTime || today}
-                          onChange={(e) => setBookingForm({ ...bookingForm, endTime: e.target.value })}
-                        />
+                        <label>今日可预约时间段：</label>
+                        <div className="time-slots-grid">
+                          {venue.availableHours?.map(hour => {
+                            const startHour = hour.split(':')[0];
+                            const endHour = (parseInt(startHour) + 1).toString().padStart(2, '0');
+                            const timeSlot = `${hour}-${endHour}:00`;
+                            const currentHour = new Date().getHours();
+                            const slotHour = parseInt(startHour);
+                            const isPastTime = slotHour <= currentHour;
+                            const isBooked = venueBookings?.bookings?.some(booking => 
+                              booking.startTime === hour
+                            );
+                            const isSelected = bookingForm.selectedTimeSlot === timeSlot;
+                            const isDisabled = isPastTime || isBooked;
+                            
+                            return (
+                              <button
+                                key={hour}
+                                type="button"
+                                className={`time-slot-btn ${isSelected ? 'selected' : ''} ${isBooked ? 'booked' : ''} ${isPastTime ? 'past-time' : ''}`}
+                                disabled={isDisabled}
+                                onClick={() => setBookingForm({ ...bookingForm, selectedTimeSlot: timeSlot })}
+                              >
+                                {timeSlot}
+                                {isBooked && <span className="booked-label">已预约</span>}
+                                {isPastTime && !isBooked && <span className="past-time-label">已过期</span>}
+                              </button>
+                            );
+                          })}
+                        </div>
                       </div>
                     </div>
+                    
+                    {bookingForm.selectedTimeSlot && (
+                      <div className="booking-summary">
+                        <p>已选择时间段：{bookingForm.selectedTimeSlot}</p>
+                        <p>预约时长：1 小时</p>
+                        {venue.price && (
+                          <p>费用：¥{venue.price}</p>
+                        )}
+                      </div>
+                    )}
+                    
                     <div className="booking-actions">
                       <button 
                         onClick={handleBookVenue}
                         className="action-btn primary"
-                        disabled={loading}
+                        disabled={loading || !bookingForm.selectedTimeSlot}
                       >
                         {loading ? '预约中...' : '确认预约'}
                       </button>
                       <button 
-                        onClick={() => setBookingForm({ startTime: '', endTime: '', show: false })}
+                        onClick={() => setBookingForm({ selectedTimeSlot: '', show: false })}
                         className="action-btn secondary"
                       >
                         取消

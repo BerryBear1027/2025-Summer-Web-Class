@@ -382,7 +382,9 @@ const Dashboard = ({ user, onNavigate, onLogout }) => {
                           </div>
                           <div className="item-meta">
                             <span className={`status-badge status-${venue.status}`}>
-                              {venue.status}
+                              {venue.status === 'available' ? '可用' :
+                               venue.status === 'maintenance' ? '维护中' :
+                               venue.status === 'closed' ? '关闭' : venue.status}
                             </span>
                           </div>
                         </div>
@@ -402,11 +404,29 @@ const Dashboard = ({ user, onNavigate, onLogout }) => {
                           </div>
                           <div className="detail-item">
                             <span className="detail-icon">👥</span>
-                            <span>{venue.capacity}人</span>
+                            <span>容量{venue.capacity || 0}人</span>
+                          </div>
+                          <div className="detail-item">
+                            <span className="detail-icon">⏰</span>
+                            <span>{venue.availableHours ? 
+                              venue.availableHours.map(hour => {
+                                const startHour = hour.split(':')[0];
+                                const endHour = (parseInt(startHour) + 1).toString().padStart(2, '0');
+                                return `${hour}-${endHour}:00`;
+                              }).slice(0, 3).join(', ') + (venue.availableHours.length > 3 ? '...' : '')
+                              : '时间待定'}</span>
                           </div>
                           <div className="detail-item">
                             <span className="detail-icon">💰</span>
-                            <span>¥{venue.price}/小时</span>
+                            <span>{venue.price ? `¥${venue.price}/小时` : '价格面议'}</span>
+                          </div>
+                          <div className="detail-item">
+                            <span className="detail-icon">📊</span>
+                            <span className={`status-text status-${venue.status}`}>
+                              {venue.status === 'available' ? '可用' :
+                               venue.status === 'maintenance' ? '维护中' :
+                               venue.status === 'closed' ? '关闭' : venue.status}
+                            </span>
                           </div>
                         </div>
                         

@@ -25,18 +25,53 @@ const ActivityDetail = ({ activity, user, onBack, onNavigate }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [isParticipating, setIsParticipating] = useState(false);
+  const [activityData, setActivityData] = useState(activity);
 
   useEffect(() => {
+    loadActivityDetails();
     loadComments();
-    checkParticipation();
   }, [activity.id]);
+
+  useEffect(() => {
+    checkParticipation();
+  }, [activityData]);
+
+  const loadActivityDetails = async () => {
+    try {
+      console.log('开始加载活动详情，ID:', activity.id);
+      const response = await sportsAPI.getActivityById(activity.id);
+      console.log('Load activity details response:', response);
+      // 检查响应结构，可能是 response.data.success 或 response.success
+      const success = response.data?.success || response.success;
+      const data = response.data?.data || response.data;
+      
+      if (success && data) {
+        console.log('Activity details data:', data);
+        console.log('参与者详情:', data.participantDetails);
+        console.log('参与者ID列表:', data.participants);
+        setActivityData(data);
+      } else {
+        console.warn('获取活动详情失败，使用传入数据');
+        console.log('传入的活动数据:', activity);
+        setActivityData(activity);
+      }
+    } catch (error) {
+      console.error('加载活动详情失败：', error);
+      // 如果获取失败，使用传入的活动数据
+      setActivityData(activity);
+    }
+  };
 
   const loadComments = async () => {
     try {
-      const response = await sportsAPI.getComments(activity.id, 'activity');
+      const response = await sportsAPI.getComments(activityData.id, 'activity');
       console.log('Load comments response:', response); // 添加调试日志
-      if (response.success) {
-        setComments(response.data || []);
+      // 检查响应结构
+      const success = response.data?.success || response.success;
+      const data = response.data?.data || response.data;
+      
+      if (success) {
+        setComments(data || []);
       }
     } catch (error) {
       console.error('加载评论失败：', error);
@@ -45,8 +80,8 @@ const ActivityDetail = ({ activity, user, onBack, onNavigate }) => {
 
   const checkParticipation = () => {
     // 根据后端实体定义，participants是string[]数组，存储的是用户ID
-    const participating = activity.participants && 
-      activity.participants.includes(user.id);
+    const participating = activityData.participants && 
+      activityData.participants.includes(user.id);
     setIsParticipating(participating);
   };
 
@@ -59,14 +94,16 @@ const ActivityDetail = ({ activity, user, onBack, onNavigate }) => {
       if (response.success) {
         setIsParticipating(true);
         // 更新参与者列表 - 添加用户ID到数组
-        activity.participants = activity.participants || [];
-        activity.participants.push(user.id);
+        const updatedActivity = { ...activityData };
+        updatedActivity.participants = updatedActivity.participants || [];
+        updatedActivity.participants.push(user.id);
         
         // 检查是否已满员，更新状态
-        if (activity.participants.length >= activity.maxParticipants) {
-          activity.status = 'full';
+        if (updatedActivity.participants.length >= updatedActivity.maxParticipants) {
+          updatedActivity.status = 'full';
         }
         
+        setActivityData(updatedActivity);
         // 移除alert，直接显示成功状态
         setError(''); // 清除错误信息
       } else {
@@ -91,12 +128,15 @@ const ActivityDetail = ({ activity, user, onBack, onNavigate }) => {
       if (response.success) {
         setIsParticipating(false);
         // 从参与者列表中移除用户ID
-        activity.participants = activity.participants.filter(id => id !== user.id);
+        const updatedActivity = { ...activityData };
+        updatedActivity.participants = updatedActivity.participants.filter(id => id !== user.id);
         
         // 如果原来是满员状态，现在有空位了，改回招募中
-        if (activity.status === 'full' && activity.participants.length < activity.maxParticipants) {
-          activity.status = 'recruiting';
+        if (updatedActivity.status === 'full' && updatedActivity.participants.length < updatedActivity.maxParticipants) {
+          updatedActivity.status = 'recruiting';
         }
+        
+        setActivityData(updatedActivity);
         
         // 移除alert，直接显示成功状态
         setError(''); // 清除错误信息
@@ -187,21 +227,21 @@ const ActivityDetail = ({ activity, user, onBack, onNavigate }) => {
     }
   };
 
-  const isCreator = activity.publisherId === user.id;
+  const isCreator = activityData.publisherId === user.id;
   const canJoin = !isParticipating && 
-    activity.status === 'recruiting' && 
-    (activity.participants?.length || 0) < (activity.maxParticipants || 0);
+    activityData.status === 'recruiting' && 
+    (activityData.participants?.length || 0) < (activityData.maxParticipants || 0);
 
   // 添加调试信息
   console.log('Activity detail state check:');
   console.log('- isParticipating:', isParticipating);
   console.log('- isCreator:', isCreator);
-  console.log('- activity.status:', activity.status);
-  console.log('- participants count:', activity.participants?.length || 0);
-  console.log('- maxParticipants:', activity.maxParticipants);
+  console.log('- activityData.status:', activityData.status);
+  console.log('- participants count:', activityData.participants?.length || 0);
+  console.log('- maxParticipants:', activityData.maxParticipants);
   console.log('- canJoin:', canJoin);
   console.log('- user.id:', user.id);
-  console.log('- activity.publisherId:', activity.publisherId);
+  console.log('- activityData.publisherId:', activityData.publisherId);
 
   try {
     return (
@@ -219,20 +259,20 @@ const ActivityDetail = ({ activity, user, onBack, onNavigate }) => {
         <div className="activity-main">
           <div className="activity-header">
             <div className="title-section">
-              <h2>{activity.name}</h2>
-              <span className="activity-type">{activity.type || '活动'}</span>
+              <h2>{activityData.name}</h2>
+              <span className="activity-type">{activityData.type || '活动'}</span>
             </div>
             <div className="status-section">
-              <span className={`status ${activity.status}`}>
-                {activity.status === 'recruiting' ? '招募中' : 
-                 activity.status === 'full' ? '已满员' :
-                 activity.status === 'ongoing' ? '进行中' :
-                 activity.status === 'completed' ? '已结束' :
-                 activity.status === 'cancelled' ? '已取消' : activity.status}
+              <span className={`status ${activityData.status}`}>
+                {activityData.status === 'recruiting' ? '招募中' : 
+                 activityData.status === 'full' ? '已满员' :
+                 activityData.status === 'ongoing' ? '进行中' :
+                 activityData.status === 'completed' ? '已结束' :
+                 activityData.status === 'cancelled' ? '已取消' : activityData.status}
               </span>
               <span className="participants-status">
-                {activity.participants?.length || 0}/{activity.maxParticipants}人
-                {(activity.participants?.length || 0) >= activity.maxParticipants ? ' (已满)' : ''}
+                {activityData.participants?.length || 0}/{activityData.maxParticipants}人
+                {(activityData.participants?.length || 0) >= activityData.maxParticipants ? ' (已满)' : ''}
               </span>
             </div>
           </div>
@@ -241,85 +281,86 @@ const ActivityDetail = ({ activity, user, onBack, onNavigate }) => {
             <div className="info-grid">
               <div className="info-item">
                 <span className="label">开始时间：</span>
-                <span>{formatDate(activity.startTime)}</span>
+                <span>{formatDate(activityData.startTime)}</span>
               </div>
               <div className="info-item">
                 <span className="label">结束时间：</span>
-                <span>{formatDate(activity.endTime)}</span>
+                <span>{formatDate(activityData.endTime)}</span>
               </div>
               <div className="info-item">
                 <span className="label">活动地点：</span>
-                <span>{activity.location}</span>
+                <span>{activityData.location}</span>
               </div>
               <div className="info-item">
                 <span className="label">参与人数：</span>
-                <span>{activity.participants?.length || 0}/{activity.maxParticipants}</span>
+                <span>{activityData.participants?.length || 0}/{activityData.maxParticipants}</span>
               </div>
               <div className="info-item">
                 <span className="label">发布者：</span>
-                <span>{activity.publisherName || '未知用户'}</span>
+                <span>{activityData.publisherName || '未知用户'}</span>
               </div>
               <div className="info-item">
                 <span className="label">发布时间：</span>
-                <span>{formatDate(activity.createdAt)}</span>
+                <span>{formatDate(activityData.createdAt)}</span>
               </div>
             </div>
           </div>
 
           <div className="description-section">
             <h3>活动描述</h3>
-            <p>{activity.description}</p>
+            <p>{activityData.description}</p>
           </div>
 
           <div className="participants-section">
-            <h3>参与者 ({activity.participants?.length || 0})</h3>
+            <h3>参与者 ({activityData.participants?.length || 0})</h3>
             <div className="participants-list">
-              {activity.participantDetails && activity.participantDetails.length > 0 ? (
-                activity.participantDetails.map((participant, index) => {
-                  // 如果是当前用户，显示当前用户名
-                  const isCurrentUser = participant.id === user.id;
-                  const displayName = isCurrentUser ? user.username : participant.username;
-                  
-                  return (
-                    <div key={participant.id} className="participant-item">
-                      <div className="participant-avatar">
-                        <div className="avatar-placeholder">{displayName[0]}</div>
+              {(() => {
+                console.log('渲染参与者列表，activityData:', activityData);
+                console.log('participantDetails:', activityData.participantDetails);
+                console.log('participants:', activityData.participants);
+                
+                if (activityData.participantDetails && activityData.participantDetails.length > 0) {
+                  return activityData.participantDetails.map((participant, index) => {
+                    // 如果是当前用户，显示当前用户名
+                    const isCurrentUser = participant.id === user.id;
+                    const displayName = isCurrentUser ? user.username : participant.username;
+                    
+                    console.log(`参与者 ${index}:`, participant, '显示名称:', displayName);
+                    
+                    return (
+                      <div key={participant.id} className="participant-item">
+                        <div className="participant-avatar">
+                          <div className="avatar-placeholder">{displayName[0]}</div>
+                        </div>
+                        <span>{displayName}</span>
                       </div>
-                      <span>{displayName}</span>
-                    </div>
-                  );
-                })
-              ) : activity.participants && activity.participants.length > 0 ? (
-                // 如果没有participantDetails，回退到使用participants
-                activity.participants.map((participantId, index) => {
-                  const isCurrentUser = participantId === user.id;
-                  const displayName = isCurrentUser ? user.username : `用户${index + 1}`;
-                  
-                  return (
-                    <div key={participantId} className="participant-item">
-                      <div className="participant-avatar">
-                        <div className="avatar-placeholder">{displayName[0]}</div>
+                    );
+                  });
+                } else if (activityData.participants && activityData.participants.length > 0) {
+                  console.log('使用回退逻辑显示参与者');
+                  // 如果没有participantDetails，回退到使用participants
+                  return activityData.participants.map((participantId, index) => {
+                    const isCurrentUser = participantId === user.id;
+                    const displayName = isCurrentUser ? user.username : `用户${index + 1}`;
+                    
+                    return (
+                      <div key={participantId} className="participant-item">
+                        <div className="participant-avatar">
+                          <div className="avatar-placeholder">{displayName[0]}</div>
+                        </div>
+                        <span>{displayName}</span>
                       </div>
-                      <span>{displayName}</span>
-                    </div>
-                  );
-                })
-              ) : (
-                <div className="empty-participants">暂无参与者</div>
-              )}
+                    );
+                  });
+                } else {
+                  return <div className="empty-participants">暂无参与者</div>;
+                }
+              })()}
             </div>
           </div>
 
           <div className="action-section">
-            {isCreator ? (
-              <button 
-                onClick={handleCancelActivity} 
-                className="action-btn danger"
-                disabled={loading}
-              >
-                {loading ? '处理中...' : '解散活动'}
-              </button>
-            ) : canJoin ? (
+            {canJoin ? (
               <button 
                 onClick={handleJoinActivity} 
                 className="action-btn primary"
@@ -342,6 +383,17 @@ const ActivityDetail = ({ activity, user, onBack, onNavigate }) => {
                  activity.status === 'completed' ? '活动已结束' :
                  activity.status === 'cancelled' ? '活动已取消' : '无法报名'}
               </div>
+            )}
+            
+            {isCreator && (
+              <button 
+                onClick={handleCancelActivity} 
+                className="action-btn danger"
+                disabled={loading}
+                style={{ marginTop: '10px' }}
+              >
+                {loading ? '处理中...' : '解散活动'}
+              </button>
             )}
           </div>
         </div>
