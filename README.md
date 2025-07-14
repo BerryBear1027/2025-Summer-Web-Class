@@ -7,8 +7,15 @@
 
 ## 项目启动
 由于还未上线，只能本地运行，download项目文件之后在当前文件夹执行\
-`npm instal`\
-`npm start`
+`cd Web_Backend`\
+`npm install`\
+`npm start`\
+`npm run dev`\
+`cd ..`\
+`cd Web_Fronted`\
+`npm install`\
+`npm start`\
+`npm run dev`
 
 
 
