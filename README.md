@@ -3,7 +3,7 @@
 实现一个多用户可操作的**体育活动**和**体育场馆**发布及参与的网站\
 \
 由于个人知识匮乏，项目中难免出现各式各样的问题，成果粗糙🙂\
-**项目设计思路在wiki中**\
+**项目设计思路在wiki中，一定要看噢**\
 [wiki链接](https://github.com/BerryBear1027/2025-Summer-Web-Class/wiki)\
 如果有问题还可发送邮件至：BearYH1027@outlook.com
 
