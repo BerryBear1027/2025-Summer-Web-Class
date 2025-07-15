@@ -15,9 +15,10 @@
 `cd Web_Fronted\\进入前端仓库`\
 `npm install`\
 `npm start`\
-`npm run dev`
+`npm run dev`\
 然后进入前端给出的local端口即可进行注册和登陆操作以进入主页面
 
+## 页面展示
 
 
 
