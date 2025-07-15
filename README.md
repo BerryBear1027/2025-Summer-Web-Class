@@ -7,7 +7,7 @@
 
 ## 项目启动
 由于还未上线，只能本地运行，download项目文件之后在当前文件夹执行\
-`cd Web_Backend//进入后端仓库`\
+`cd Web_Backend\\进入后端仓库`\
 `npm install`\
 `npm run dev`\
 接着打开新的终端\
