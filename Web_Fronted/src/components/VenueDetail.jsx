@@ -42,7 +42,7 @@ const VenueDetail = ({ venue, user, onBack, onNavigate }) => {
     try {
       const response = await sportsAPI.getVenueBookings(venue.id, date);
       console.log('Load venue bookings response:', response);
-      
+
       // 由于axios拦截器返回response.data，这里直接检查success
       if (response.success && response.data) {
         setVenueBookings(response.data);
@@ -64,11 +64,11 @@ const VenueDetail = ({ venue, user, onBack, onNavigate }) => {
     try {
       const response = await sportsAPI.deleteVenue(venue.id);
       console.log('删除场馆响应：', response);
-      
+
       // 检查响应结构
       const success = response.success;
       const message = response.message;
-      
+
       if (success) {
         alert('场馆已删除');
         onBack();
@@ -90,12 +90,12 @@ const VenueDetail = ({ venue, user, onBack, onNavigate }) => {
     }
 
     const currentHour = new Date().getHours();
-    
+
     // 检查选择的时间段是否都在当前时间之后
     for (const timeSlot of bookingForm.selectedTimeSlots) {
       const [startTime] = timeSlot.split('-');
       const selectedHour = parseInt(startTime.split(':')[0]);
-      
+
       if (selectedHour <= currentHour) {
         setError('预约时间不能早于当前时间');
         return;
@@ -104,10 +104,10 @@ const VenueDetail = ({ venue, user, onBack, onNavigate }) => {
 
     setLoading(true);
     setError('');
-    
+
     try {
       const today = new Date().toISOString().split('T')[0];
-      
+
       // 为每个时间段创建预约
       const bookingPromises = bookingForm.selectedTimeSlots.map(timeSlot => {
         const [startTime, endTime] = timeSlot.split('-');
@@ -121,10 +121,10 @@ const VenueDetail = ({ venue, user, onBack, onNavigate }) => {
 
       const responses = await Promise.all(bookingPromises);
       console.log('预约响应：', responses);
-      
+
       // 检查是否所有预约都成功
       const allSuccess = responses.every(response => response.success);
-      
+
       if (allSuccess) {
         alert(`预约成功！已预约 ${bookingForm.selectedTimeSlots.length} 个时间段`);
         setBookingForm({ selectedTimeSlots: [], show: false });
@@ -133,18 +133,18 @@ const VenueDetail = ({ venue, user, onBack, onNavigate }) => {
       } else {
         // 找到失败的预约
         const failedBookings = responses.filter(response => !response.success);
-        
+
         if (failedBookings.length > 0) {
           const firstError = failedBookings[0];
           const message = firstError.message;
-          
+
           if (message && (message.includes('已被预约') || message.includes('时间段冲突') || message.includes('该时间段'))) {
             setError('部分时间段已经被预约！请重新选择');
           } else {
             setError(message || '部分预约失败');
           }
         }
-        
+
         // 重新加载预约信息以更新可用时间段
         loadVenueBookings(today);
       }
@@ -249,8 +249,8 @@ const VenueDetail = ({ venue, user, onBack, onNavigate }) => {
 
           <div className="action-section">
             {isCreator ? (
-              <button 
-                onClick={handleDeleteVenue} 
+              <button
+                onClick={handleDeleteVenue}
                 className="action-btn danger"
                 disabled={loading}
               >
@@ -263,7 +263,7 @@ const VenueDetail = ({ venue, user, onBack, onNavigate }) => {
                   const isExpired = displayStatus === 'expired';
                   const isFullyBooked = displayStatus === 'fully_booked';
                   const isAvailable = displayStatus === 'available';
-                  
+
                   if (isExpired) {
                     return (
                       <div className="unavailable-notice expired-notice">
@@ -271,11 +271,11 @@ const VenueDetail = ({ venue, user, onBack, onNavigate }) => {
                       </div>
                     );
                   }
-                  
+
                   if (isFullyBooked) {
                     return (
                       <div>
-                        <button 
+                        <button
                           className="action-btn primary disabled"
                           disabled={true}
                         >
@@ -287,7 +287,7 @@ const VenueDetail = ({ venue, user, onBack, onNavigate }) => {
                       </div>
                     );
                   }
-                  
+
                   if (!isAvailable) {
                     return (
                       <div className="unavailable-notice">
@@ -295,9 +295,9 @@ const VenueDetail = ({ venue, user, onBack, onNavigate }) => {
                       </div>
                     );
                   }
-                  
+
                   return !bookingForm.show ? (
-                    <button 
+                    <button
                       onClick={() => setBookingForm({ ...bookingForm, show: true })}
                       className="action-btn primary"
                     >
@@ -315,7 +315,7 @@ const VenueDetail = ({ venue, user, onBack, onNavigate }) => {
                         }).join(', ') || '暂无设置'}</p>
                         <p>价格：¥{venue.price || 0}/小时</p>
                       </div>
-                      
+
                       <div className="time-inputs">
                         <div className="input-group">
                           <label>今日可预约时间段：</label>
@@ -327,15 +327,15 @@ const VenueDetail = ({ venue, user, onBack, onNavigate }) => {
                               const currentHour = new Date().getHours();
                               const slotHour = parseInt(startHour);
                               const isPastTime = slotHour <= currentHour;
-                              const isBooked = venueBookings?.bookings?.some(booking => 
+                              const isBooked = venueBookings?.bookings?.some(booking =>
                                 booking.startTime === hour
                               );
                               const isSelected = bookingForm.selectedTimeSlots.includes(timeSlot);
                               const isDisabled = isPastTime || isBooked;
-                              
+
                               const handleTimeSlotClick = () => {
                                 if (isDisabled) return;
-                                
+
                                 if (isSelected) {
                                   // 取消选择
                                   setBookingForm({
@@ -350,7 +350,7 @@ const VenueDetail = ({ venue, user, onBack, onNavigate }) => {
                                   });
                                 }
                               };
-                              
+
                               return (
                                 <button
                                   key={hour}
@@ -368,7 +368,7 @@ const VenueDetail = ({ venue, user, onBack, onNavigate }) => {
                           </div>
                         </div>
                       </div>
-                      
+
                       {bookingForm.selectedTimeSlots.length > 0 && (
                         <div className="booking-summary">
                           <p>已选择时间段：{bookingForm.selectedTimeSlots.join(', ')}</p>
@@ -378,16 +378,16 @@ const VenueDetail = ({ venue, user, onBack, onNavigate }) => {
                           )}
                         </div>
                       )}
-                      
+
                       <div className="booking-actions">
-                        <button 
+                        <button
                           onClick={handleBookVenue}
                           className="action-btn primary"
                           disabled={loading || bookingForm.selectedTimeSlots.length === 0}
                         >
                           {loading ? '预约中...' : '确认预约'}
                         </button>
-                        <button 
+                        <button
                           onClick={() => setBookingForm({ selectedTimeSlots: [], show: false })}
                           className="action-btn secondary"
                         >
@@ -404,7 +404,7 @@ const VenueDetail = ({ venue, user, onBack, onNavigate }) => {
 
         <div className="comments-section">
           <h3>评论 ({comments.length})</h3>
-          
+
           <div className="comment-form">
             <textarea
               value={newComment}
@@ -412,7 +412,7 @@ const VenueDetail = ({ venue, user, onBack, onNavigate }) => {
               placeholder="发表你的看法..."
               rows="3"
             />
-            <button 
+            <button
               onClick={handleAddComment}
               disabled={loading || !newComment.trim()}
               className="comment-btn"

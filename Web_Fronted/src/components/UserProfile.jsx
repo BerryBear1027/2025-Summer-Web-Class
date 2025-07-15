@@ -124,8 +124,8 @@ const UserProfile = ({ user: initialUser, onLogout, onUserUpdate, onBack }) => {
           <h1>个人资料</h1>
         </div>
         {!isEditing && (
-          <button 
-            onClick={() => setIsEditing(true)} 
+          <button
+            onClick={() => setIsEditing(true)}
             className="edit-button"
           >
             编辑资料
@@ -172,7 +172,7 @@ const UserProfile = ({ user: initialUser, onLogout, onUserUpdate, onBack }) => {
         <div className="profile-main">
           <div className="form-section">
             <h2>基本信息</h2>
-            
+
             <div className="form-group">
               <label htmlFor="username">用户名</label>
               {isEditing ? (
@@ -254,9 +254,9 @@ const UserProfile = ({ user: initialUser, onLogout, onUserUpdate, onBack }) => {
                 </select>
               ) : (
                 <div className="form-value">
-                  {user.gender === 'male' ? '男' : 
-                   user.gender === 'female' ? '女' : 
-                   user.gender === 'other' ? '其他' : '未设置'}
+                  {user.gender === 'male' ? '男' :
+                    user.gender === 'female' ? '女' :
+                      user.gender === 'other' ? '其他' : '未设置'}
                 </div>
               )}
             </div>

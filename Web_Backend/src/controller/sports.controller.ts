@@ -23,7 +23,7 @@ export class SportsController {
 
     const token = authorization.substring(7);
     const userInfo = await this.userService.getUserByToken(token);
-    
+
     if (!userInfo.success) {
       throw new Error('无效的token');
     }
@@ -39,8 +39,8 @@ export class SportsController {
     try {
       const user = await this.getUserFromToken(authorization);
       const result = await this.sportsService.createActivity(
-        user.id, 
-        user.username, 
+        user.id,
+        user.username,
         activityData
       );
       return result;
@@ -77,7 +77,7 @@ export class SportsController {
       console.log('获取活动详情，ID:', id);
       const activity = await this.sportsService.getActivityById(id);
       console.log('Service返回的活动数据:', activity);
-      
+
       if (!activity) {
         return {
           success: false,
@@ -188,8 +188,8 @@ export class SportsController {
     try {
       const user = await this.getUserFromToken(authorization);
       const result = await this.sportsService.createVenue(
-        user.id, 
-        user.username, 
+        user.id,
+        user.username,
         venueData
       );
       return result;
@@ -353,8 +353,8 @@ export class SportsController {
     try {
       const user = await this.getUserFromToken(authorization);
       const result = await this.sportsService.createComment(
-        user.id, 
-        user.username, 
+        user.id,
+        user.username,
         commentData
       );
       return result;

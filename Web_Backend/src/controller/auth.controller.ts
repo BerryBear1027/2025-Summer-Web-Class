@@ -17,7 +17,7 @@ export class AuthController {
   @Post('/register')
   async register(@Body() userData: RegisterUserDto) {
     console.log('收到注册请求，数据：', userData);
-    
+
     // 基本验证
     if (!userData.username || !userData.password) {
       return {
@@ -79,7 +79,7 @@ export class AuthController {
   @Post('/login')
   async login(@Body() loginData: LoginUserDto) {
     console.log('收到登录请求，数据：', loginData);
-    
+
     // 基本验证
     if (!loginData.username || !loginData.password) {
       return {
@@ -148,7 +148,7 @@ export class AuthController {
   async uploadImage(@Files() files: any[], @Headers('authorization') authorization: string) {
     try {
       console.log('收到图片上传请求');
-      
+
       if (!authorization || !authorization.startsWith('Bearer ')) {
         return {
           success: false,
@@ -158,7 +158,7 @@ export class AuthController {
 
       const token = authorization.substring(7);
       const decoded = this.userService.verifyToken(token);
-      
+
       if (!decoded.userId) {
         return {
           success: false,
@@ -215,7 +215,7 @@ export class AuthController {
 
       // 返回图片URL
       const imageUrl = `/uploads/images/${filename}`;
-      
+
       return {
         success: true,
         message: '图片上传成功',
@@ -247,7 +247,7 @@ export class AuthController {
     try {
       console.log('收到文件上传测试请求');
       console.log('文件信息：', files);
-      
+
       if (!files || files.length === 0) {
         return {
           success: false,

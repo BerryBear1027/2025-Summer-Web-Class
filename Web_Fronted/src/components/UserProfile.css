@@ -93,8 +93,13 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .retry-button {
@@ -182,7 +187,9 @@
 }
 
 /* 头像样式 - 优化居中和比例 */
-.avatar-placeholder, .avatar-placeholder-large, .avatar-placeholder-sm {
+.avatar-placeholder,
+.avatar-placeholder-large,
+.avatar-placeholder-sm {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -383,15 +390,15 @@
     padding: 16px;
     gap: 16px;
   }
-  
+
   .profile-sidebar {
     flex: none;
   }
-  
+
   .form-actions {
     flex-direction: column;
   }
-  
+
   .save-button,
   .cancel-button {
     width: 100%;

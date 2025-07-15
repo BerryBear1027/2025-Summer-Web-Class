@@ -105,7 +105,7 @@ const CreateActivity = ({ user, onBack, onSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -115,7 +115,7 @@ const CreateActivity = ({ user, onBack, onSuccess }) => {
 
     try {
       let imageUrl = '';
-      
+
       // 如果有图片，先上传图片
       if (image) {
         const uploadResponse = await sportsAPI.uploadImage(image);
@@ -169,7 +169,7 @@ const CreateActivity = ({ user, onBack, onSuccess }) => {
         <form onSubmit={handleSubmit} className="activity-form">
           <div className="form-section">
             <h3>基本信息</h3>
-            
+
             <div className="form-group">
               <label htmlFor="name">活动名称 *</label>
               <input
@@ -215,7 +215,7 @@ const CreateActivity = ({ user, onBack, onSuccess }) => {
 
           <div className="form-section">
             <h3>时间地点</h3>
-            
+
             <div className="form-group">
               <label htmlFor="location">活动地点 *</label>
               <input
@@ -275,7 +275,7 @@ const CreateActivity = ({ user, onBack, onSuccess }) => {
 
           <div className="form-section">
             <h3>活动图片</h3>
-            
+
             <div className="form-group">
               <label htmlFor="image">上传图片（可选）</label>
               <input
@@ -291,8 +291,8 @@ const CreateActivity = ({ user, onBack, onSuccess }) => {
               {image && (
                 <div className="image-preview">
                   <img src={URL.createObjectURL(image)} alt="预览" />
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     onClick={() => setImage(null)}
                     className="remove-image"
                   >
@@ -304,16 +304,16 @@ const CreateActivity = ({ user, onBack, onSuccess }) => {
           </div>
 
           <div className="form-actions">
-            <button 
-              type="button" 
-              onClick={onBack} 
+            <button
+              type="button"
+              onClick={onBack}
               className="cancel-btn"
               disabled={loading}
             >
               取消
             </button>
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="submit-btn"
               disabled={loading}
             >

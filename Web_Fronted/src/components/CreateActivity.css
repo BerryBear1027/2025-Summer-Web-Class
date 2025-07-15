@@ -278,23 +278,23 @@ input[type="file"]::file-selector-button:hover {
   .create-header {
     padding: 1rem;
   }
-  
+
   .create-content {
     padding: 1rem;
   }
-  
+
   .activity-form {
     padding: 1.5rem;
   }
-  
+
   .form-row {
     grid-template-columns: 1fr;
   }
-  
+
   .form-actions {
     flex-direction: column-reverse;
   }
-  
+
   .image-preview img {
     width: 150px;
     height: 120px;

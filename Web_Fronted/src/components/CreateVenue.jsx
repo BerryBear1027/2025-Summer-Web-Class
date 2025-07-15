@@ -71,19 +71,19 @@ const CreateVenue = ({ user, onBack, onSuccess }) => {
     // 检查是否为已过去的时间段
     const currentHour = new Date().getHours();
     const slotHour = parseInt(timeSlot.value.split(':')[0]);
-    
+
     if (slotHour <= currentHour) {
       setError('不能选择已过去的时间段');
       return;
     }
-    
+
     setFormData(prev => ({
       ...prev,
       availableHours: prev.availableHours.includes(timeSlot.value)
         ? prev.availableHours.filter(h => h !== timeSlot.value)
         : [...prev.availableHours, timeSlot.value].sort()
     }));
-    
+
     // 清除错误信息
     setError('');
   };
@@ -132,7 +132,7 @@ const CreateVenue = ({ user, onBack, onSuccess }) => {
     // 检查是否为当天发布
     const today = new Date();
     const currentHour = today.getHours();
-    
+
     // 过滤掉已经过去的时间段
     const validTimeSlots = formData.availableHours.filter(hour => {
       const hourValue = parseInt(hour.split(':')[0]);
@@ -155,7 +155,7 @@ const CreateVenue = ({ user, onBack, onSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -165,7 +165,7 @@ const CreateVenue = ({ user, onBack, onSuccess }) => {
 
     try {
       let imageUrl = '';
-      
+
       // 如果有图片，先上传图片
       if (image) {
         const uploadResponse = await sportsAPI.uploadImage(image);
@@ -210,7 +210,7 @@ const CreateVenue = ({ user, onBack, onSuccess }) => {
       const hourValue = parseInt(hour.split(':')[0]);
       return hourValue > currentHour;
     });
-    
+
     if (validHours.length !== formData.availableHours.length) {
       setFormData(prev => ({
         ...prev,
@@ -234,7 +234,7 @@ const CreateVenue = ({ user, onBack, onSuccess }) => {
         <form onSubmit={handleSubmit} className="venue-form">
           <div className="form-section">
             <h3>基本信息</h3>
-            
+
             <div className="form-group">
               <label htmlFor="name">场馆名称 *</label>
               <input
@@ -298,7 +298,7 @@ const CreateVenue = ({ user, onBack, onSuccess }) => {
 
           <div className="form-section">
             <h3>地址信息</h3>
-            
+
             <div className="form-group">
               <label htmlFor="location">场馆地址 *</label>
               <input
@@ -315,7 +315,7 @@ const CreateVenue = ({ user, onBack, onSuccess }) => {
 
           <div className="form-section">
             <h3>规格与价格</h3>
-            
+
             <div className="form-row">
               <div className="form-group">
                 <label htmlFor="capacity">容量（人数）*</label>
@@ -359,10 +359,10 @@ const CreateVenue = ({ user, onBack, onSuccess }) => {
                   const currentHour = new Date().getHours();
                   const slotHour = parseInt(timeSlot.value.split(':')[0]);
                   const isPastTime = slotHour <= currentHour;
-                  
+
                   return (
-                    <label 
-                      key={timeSlot.value} 
+                    <label
+                      key={timeSlot.value}
                       className={`time-option ${isPastTime ? 'disabled' : ''}`}
                     >
                       <input
@@ -392,7 +392,7 @@ const CreateVenue = ({ user, onBack, onSuccess }) => {
 
           <div className="form-section">
             <h3>场馆图片</h3>
-            
+
             <div className="form-group">
               <label htmlFor="image">上传图片（可选）</label>
               <input
@@ -408,8 +408,8 @@ const CreateVenue = ({ user, onBack, onSuccess }) => {
               {image && (
                 <div className="image-preview">
                   <img src={URL.createObjectURL(image)} alt="预览" />
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     onClick={() => setImage(null)}
                     className="remove-image"
                   >
@@ -421,16 +421,16 @@ const CreateVenue = ({ user, onBack, onSuccess }) => {
           </div>
 
           <div className="form-actions">
-            <button 
-              type="button" 
-              onClick={onBack} 
+            <button
+              type="button"
+              onClick={onBack}
               className="cancel-btn"
               disabled={loading}
             >
               取消
             </button>
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="submit-btn"
               disabled={loading}
             >

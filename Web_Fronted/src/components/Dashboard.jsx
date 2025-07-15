@@ -103,14 +103,14 @@ const Dashboard = ({ user, onNavigate, onLogout, refreshTrigger }) => {
       <header className="github-header">
         <div className="header-content">
           <div className="header-left">            <button
-              className="sidebar-toggle"
-              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            >
-              ≡
-            </button>
+            className="sidebar-toggle"
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+          >
+            ≡
+          </button>
             <h1 className="site-title">体育活动室</h1>
           </div>
-          
+
           <div className="header-center">
             <div className="search-container">
               <input
@@ -129,8 +129,8 @@ const Dashboard = ({ user, onNavigate, onLogout, refreshTrigger }) => {
 
           <div className="header-right">
             <div className="create-dropdown">
-              <button 
-                onClick={() => setShowCreateMenu(!showCreateMenu)} 
+              <button
+                onClick={() => setShowCreateMenu(!showCreateMenu)}
                 className="create-button"
                 title="发布内容"
               >
@@ -140,20 +140,20 @@ const Dashboard = ({ user, onNavigate, onLogout, refreshTrigger }) => {
               </button>
               {showCreateMenu && (
                 <div className="create-menu">
-                  <button 
+                  <button
                     onClick={() => {
                       setShowCreateMenu(false);
                       onNavigate('create-activity');
-                    }} 
+                    }}
                     className="menu-item"
                   >
                     发布活动
                   </button>
-                  <button 
+                  <button
                     onClick={() => {
                       setShowCreateMenu(false);
                       onNavigate('create-venue');
-                    }} 
+                    }}
                     className="menu-item"
                   >
                     发布场馆
@@ -195,7 +195,7 @@ const Dashboard = ({ user, onNavigate, onLogout, refreshTrigger }) => {
                 <h4 className={`nav-title ${sidebarCollapsed ? 'hidden' : ''}`}>个人</h4>
                 <ul className="nav-list">
                   <li className="nav-item">
-                    <button 
+                    <button
                       onClick={() => onNavigate('history')}
                       className="nav-link"
                       title="历史记录"
@@ -205,7 +205,7 @@ const Dashboard = ({ user, onNavigate, onLogout, refreshTrigger }) => {
                     </button>
                   </li>
                   <li className="nav-item">
-                    <button 
+                    <button
                       onClick={() => onNavigate('profile')}
                       className="nav-link"
                       title="个人资料"
@@ -233,14 +233,14 @@ const Dashboard = ({ user, onNavigate, onLogout, refreshTrigger }) => {
           <div className="main-header">
             <div className="tab-navigation">
               <div className="tab-container">
-                <button 
+                <button
                   className={`tab-button ${activeTab === 'activities' ? 'active' : ''}`}
                   onClick={() => setActiveTab('activities')}
                 >
                   <span className="tab-icon">🏃</span>
                   活动 ({activities.length})
                 </button>
-                <button 
+                <button
                   className={`tab-button ${activeTab === 'venues' ? 'active' : ''}`}
                   onClick={() => setActiveTab('venues')}
                 >
@@ -248,9 +248,9 @@ const Dashboard = ({ user, onNavigate, onLogout, refreshTrigger }) => {
                   场馆 ({venues.length})
                 </button>
               </div>
-              
+
               <div className="view-options">
-                <button 
+                <button
                   onClick={() => onNavigate(activeTab === 'activities' ? 'create-activity' : 'create-venue')}
                   className="new-button"
                 >
@@ -278,7 +278,7 @@ const Dashboard = ({ user, onNavigate, onLogout, refreshTrigger }) => {
                     <div className="empty-icon">🏃</div>
                     <h3>暂无活动</h3>
                     <p>创建你的第一个活动吧！</p>
-                    <button 
+                    <button
                       onClick={() => onNavigate('create-activity')}
                       className="create-first-button"
                     >
@@ -292,7 +292,7 @@ const Dashboard = ({ user, onNavigate, onLogout, refreshTrigger }) => {
                     const isDeleted = activity.status === 'deleted';
                     const isCancelled = activity.status === 'cancelled';
                     const isNonInteractive = isExpired || isDeleted || isCancelled;
-                    
+
                     return (
                       <div key={activity.id} className={`item-card activity-card ${isExpired ? 'expired-card' : ''} ${isDeleted ? 'deleted-card' : ''} ${isCancelled ? 'cancelled-card' : ''}`} onClick={() => {
                         if (!isNonInteractive) {
@@ -306,56 +306,56 @@ const Dashboard = ({ user, onNavigate, onLogout, refreshTrigger }) => {
                               <h3 style={{ cursor: isNonInteractive ? 'not-allowed' : 'pointer' }}>{activity.name}</h3>
                               <span className="item-type">{activity.type || '活动'}</span>
                             </div>
-                          <div className="item-meta">
-                            <span className={`status-badge status-${displayStatus}`}>
-                              {displayStatus === 'recruiting' ? '招募中' : 
-                               displayStatus === 'full' ? '已满员' :
-                               displayStatus === 'ongoing' ? '进行中' :
-                               displayStatus === 'completed' ? '已结束' :
-                               displayStatus === 'cancelled' ? '已解散' :
-                               displayStatus === 'deleted' ? '已删除' :
-                               displayStatus === 'expired' ? '已过期' : displayStatus}
-                            </span>
-                            {!isDeleted && !isCancelled && (
-                              <span className="participants-count">
-                                {activity.participants?.length || 0}/{activity.maxParticipants}人
+                            <div className="item-meta">
+                              <span className={`status-badge status-${displayStatus}`}>
+                                {displayStatus === 'recruiting' ? '招募中' :
+                                  displayStatus === 'full' ? '已满员' :
+                                    displayStatus === 'ongoing' ? '进行中' :
+                                      displayStatus === 'completed' ? '已结束' :
+                                        displayStatus === 'cancelled' ? '已解散' :
+                                          displayStatus === 'deleted' ? '已删除' :
+                                            displayStatus === 'expired' ? '已过期' : displayStatus}
                               </span>
-                            )}
-                          </div>
-                        </div>
-                        
-                        <div className="item-description">
-                          {activity.description}
-                        </div>
-                        
-                        <div className="item-details">
-                          <div className="detail-item">
-                            <span className="detail-icon">📍</span>
-                            <span>{activity.location}</span>
-                          </div>
-                          <div className="detail-item">
-                            <span className="detail-icon">⏰</span>
-                            <span>{formatDate(activity.startTime)}</span>
-                          </div>
-                          <div className="detail-item">
-                            <span className="detail-icon">👥</span>
-                            <span>{activity.participants?.length || 0}/{activity.maxParticipants}</span>
-                          </div>
-                        </div>
-                        
-                        <div className="item-footer">
-                          <div className="creator-info">
-                            <div className="creator-avatar">
-                              <div className="avatar-placeholder-sm">{(activity.publisherName || '?')[0]}</div>
+                              {!isDeleted && !isCancelled && (
+                                <span className="participants-count">
+                                  {activity.participants?.length || 0}/{activity.maxParticipants}人
+                                </span>
+                              )}
                             </div>
-                            <span>{activity.publisherName || '未知用户'}</span>
                           </div>
-                          <div className="publish-time">
-                            {formatDate(activity.createdAt)}
+
+                          <div className="item-description">
+                            {activity.description}
+                          </div>
+
+                          <div className="item-details">
+                            <div className="detail-item">
+                              <span className="detail-icon">📍</span>
+                              <span>{activity.location}</span>
+                            </div>
+                            <div className="detail-item">
+                              <span className="detail-icon">⏰</span>
+                              <span>{formatDate(activity.startTime)}</span>
+                            </div>
+                            <div className="detail-item">
+                              <span className="detail-icon">👥</span>
+                              <span>{activity.participants?.length || 0}/{activity.maxParticipants}</span>
+                            </div>
+                          </div>
+
+                          <div className="item-footer">
+                            <div className="creator-info">
+                              <div className="creator-avatar">
+                                <div className="avatar-placeholder-sm">{(activity.publisherName || '?')[0]}</div>
+                              </div>
+                              <span>{activity.publisherName || '未知用户'}</span>
+                            </div>
+                            <div className="publish-time">
+                              {formatDate(activity.createdAt)}
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
                     );
                   })
                 )}
@@ -367,7 +367,7 @@ const Dashboard = ({ user, onNavigate, onLogout, refreshTrigger }) => {
                     <div className="empty-icon">🏟️</div>
                     <h3>暂无场馆</h3>
                     <p>创建你的第一个场馆吧！</p>
-                    <button 
+                    <button
                       onClick={() => onNavigate('create-venue')}
                       className="create-first-button"
                     >
@@ -382,7 +382,7 @@ const Dashboard = ({ user, onNavigate, onLogout, refreshTrigger }) => {
                     const isDeleted = venue.status === 'deleted';
                     const isClosed = venue.status === 'closed';
                     const isNonInteractive = isExpired || isDeleted || isClosed;
-                    
+
                     return (
                       <div key={venue.id} className={`item-card venue-card ${isExpired ? 'expired-card' : ''} ${isFullyBooked ? 'fully-booked-card' : ''} ${isDeleted ? 'deleted-card' : ''} ${isClosed ? 'closed-card' : ''}`} onClick={() => {
                         if (!isNonInteractive) {
@@ -398,11 +398,11 @@ const Dashboard = ({ user, onNavigate, onLogout, refreshTrigger }) => {
                             <div className="item-meta">
                               <span className={`status-badge status-${displayStatus}`}>
                                 {displayStatus === 'available' ? '可用' :
-                                 displayStatus === 'maintenance' ? '维护中' :
-                                 displayStatus === 'closed' ? '已关闭' :
-                                 displayStatus === 'deleted' ? '已删除' :
-                                 displayStatus === 'expired' ? '已过期' :
-                                 displayStatus === 'fully_booked' ? '已满约' : displayStatus}
+                                  displayStatus === 'maintenance' ? '维护中' :
+                                    displayStatus === 'closed' ? '已关闭' :
+                                      displayStatus === 'deleted' ? '已删除' :
+                                        displayStatus === 'expired' ? '已过期' :
+                                          displayStatus === 'fully_booked' ? '已满约' : displayStatus}
                               </span>
                               {!isDeleted && !isClosed && (
                                 <span className={`remaining-slots ${(venue.remainingSlots || 0) === 0 ? 'no-slots' : ''}`}>
@@ -411,61 +411,61 @@ const Dashboard = ({ user, onNavigate, onLogout, refreshTrigger }) => {
                               )}
                             </div>
                           </div>
-                        
-                        <div className="item-description">
-                          {venue.description}
-                        </div>
-                        
-                        <div className="item-details">
-                          <div className="detail-item">
-                            <span className="detail-icon">📍</span>
-                            <span>{venue.location}</span>
+
+                          <div className="item-description">
+                            {venue.description}
                           </div>
-                          <div className="detail-item">
-                            <span className="detail-icon">🏃</span>
-                            <span>{venue.sportType}</span>
-                          </div>
-                          <div className="detail-item">
-                            <span className="detail-icon">👥</span>
-                            <span>容量{venue.capacity || 0}人</span>
-                          </div>
-                          <div className="detail-item">
-                            <span className="detail-icon">⏰</span>
-                            <span>{venue.availableHours ? 
-                              venue.availableHours.map(hour => {
-                                const startHour = hour.split(':')[0];
-                                const endHour = (parseInt(startHour) + 1).toString().padStart(2, '0');
-                                return `${hour}-${endHour}:00`;
-                              }).slice(0, 3).join(', ') + (venue.availableHours.length > 3 ? '...' : '')
-                              : '时间待定'}</span>
-                          </div>
-                          <div className="detail-item">
-                            <span className="detail-icon">💰</span>
-                            <span>{venue.price ? `¥${venue.price}/小时` : '价格面议'}</span>
-                          </div>
-                          <div className="detail-item">
-                            <span className="detail-icon">📊</span>
-                            <span className={`status-text status-${venue.status}`}>
-                              {venue.status === 'available' ? '可用' :
-                               venue.status === 'maintenance' ? '维护中' :
-                               venue.status === 'closed' ? '关闭' : venue.status}
-                            </span>
-                          </div>
-                        </div>
-                        
-                        <div className="item-footer">
-                          <div className="creator-info">
-                            <div className="creator-avatar">
-                              <div className="avatar-placeholder-sm">{(venue.publisherName || '?')[0]}</div>
+
+                          <div className="item-details">
+                            <div className="detail-item">
+                              <span className="detail-icon">📍</span>
+                              <span>{venue.location}</span>
                             </div>
-                            <span>{venue.publisherName || '未知用户'}</span>
+                            <div className="detail-item">
+                              <span className="detail-icon">🏃</span>
+                              <span>{venue.sportType}</span>
+                            </div>
+                            <div className="detail-item">
+                              <span className="detail-icon">👥</span>
+                              <span>容量{venue.capacity || 0}人</span>
+                            </div>
+                            <div className="detail-item">
+                              <span className="detail-icon">⏰</span>
+                              <span>{venue.availableHours ?
+                                venue.availableHours.map(hour => {
+                                  const startHour = hour.split(':')[0];
+                                  const endHour = (parseInt(startHour) + 1).toString().padStart(2, '0');
+                                  return `${hour}-${endHour}:00`;
+                                }).slice(0, 3).join(', ') + (venue.availableHours.length > 3 ? '...' : '')
+                                : '时间待定'}</span>
+                            </div>
+                            <div className="detail-item">
+                              <span className="detail-icon">💰</span>
+                              <span>{venue.price ? `¥${venue.price}/小时` : '价格面议'}</span>
+                            </div>
+                            <div className="detail-item">
+                              <span className="detail-icon">📊</span>
+                              <span className={`status-text status-${venue.status}`}>
+                                {venue.status === 'available' ? '可用' :
+                                  venue.status === 'maintenance' ? '维护中' :
+                                    venue.status === 'closed' ? '关闭' : venue.status}
+                              </span>
+                            </div>
                           </div>
-                          <div className="publish-time">
-                            {formatDate(venue.createdAt)}
+
+                          <div className="item-footer">
+                            <div className="creator-info">
+                              <div className="creator-avatar">
+                                <div className="avatar-placeholder-sm">{(venue.publisherName || '?')[0]}</div>
+                              </div>
+                              <span>{venue.publisherName || '未知用户'}</span>
+                            </div>
+                            <div className="publish-time">
+                              {formatDate(venue.createdAt)}
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
                     );
                   })
                 )}

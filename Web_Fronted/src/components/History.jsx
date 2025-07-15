@@ -129,19 +129,19 @@ const History = ({ user, onBack, onNavigate }) => {
 
       <div className="history-content">
         <div className="history-tabs">
-          <button 
+          <button
             className={`tab-btn ${activeTab === 'activities' ? 'active' : ''}`}
             onClick={() => setActiveTab('activities')}
           >
             参与活动 ({data.activities.length})
           </button>
-          <button 
+          <button
             className={`tab-btn ${activeTab === 'bookings' ? 'active' : ''}`}
             onClick={() => setActiveTab('bookings')}
           >
             场馆预约 ({data.bookings.length})
           </button>
-          <button 
+          <button
             className={`tab-btn ${activeTab === 'publications' ? 'active' : ''}`}
             onClick={() => setActiveTab('publications')}
           >
@@ -158,7 +158,7 @@ const History = ({ user, onBack, onNavigate }) => {
                 data.activities.map((activity) => (
                   <div key={activity.id} className="history-item activity-item">
                     <div className="item-header">
-                      <h3 
+                      <h3
                         onClick={() => (activity.status !== 'deleted' && activity.status !== 'cancelled') && onNavigate('activity-detail', activity)}
                         className={`clickable-title ${(activity.status === 'deleted' || activity.status === 'cancelled') ? 'deleted-item' : ''}`}
                         title={(activity.status === 'deleted' || activity.status === 'cancelled') ? '活动已被删除或解散' : "点击查看活动详情"}
@@ -167,14 +167,14 @@ const History = ({ user, onBack, onNavigate }) => {
                         {(activity.status === 'deleted' || activity.status === 'cancelled') && <span className="deleted-tag">（{activity.status === 'deleted' ? '已删除' : '已解散'}）</span>}
                       </h3>
                       <div className="item-actions">
-                        <span 
+                        <span
                           className="status"
                           style={{ backgroundColor: getStatusColor(activity.status) }}
                         >
                           {getStatusText(activity.status)}
                         </span>
                         {(activity.status !== 'deleted' && activity.status !== 'cancelled') && (
-                          <button 
+                          <button
                             onClick={() => onNavigate('activity-detail', activity)}
                             className="view-detail-btn"
                           >
@@ -223,7 +223,7 @@ const History = ({ user, onBack, onNavigate }) => {
                 data.bookings.map((booking) => (
                   <div key={booking.id} className="history-item booking-item">
                     <div className="item-header">
-                      <h3 
+                      <h3
                         onClick={() => booking.venue && booking.venue.status !== 'deleted' && onNavigate('venue-detail', booking.venue)}
                         className={`clickable-title ${!booking.venue || booking.venue.status === 'deleted' ? 'deleted-item' : ''}`}
                         title={!booking.venue || booking.venue.status === 'deleted' ? '场馆已被删除' : "点击查看场馆详情"}
@@ -232,14 +232,14 @@ const History = ({ user, onBack, onNavigate }) => {
                         {(!booking.venue || booking.venue.status === 'deleted') && <span className="deleted-tag">（已删除）</span>}
                       </h3>
                       <div className="booking-actions">
-                        <span 
+                        <span
                           className="status"
                           style={{ backgroundColor: getStatusColor(booking.status) }}
                         >
                           {getStatusText(booking.status)}
                         </span>
                         {(booking.status === 'confirmed' || booking.status === 'pending') && (
-                          <button 
+                          <button
                             onClick={() => handleCancelBooking(booking.id)}
                             className="cancel-booking-btn"
                           >
@@ -247,7 +247,7 @@ const History = ({ user, onBack, onNavigate }) => {
                           </button>
                         )}
                         {booking.venue && booking.venue.status !== 'deleted' && (
-                          <button 
+                          <button
                             onClick={() => onNavigate('venue-detail', booking.venue)}
                             className="view-detail-btn"
                           >
@@ -292,31 +292,31 @@ const History = ({ user, onBack, onNavigate }) => {
                 data.publications.map((item) => (
                   <div key={`${item.type}-${item.id}`} className="history-item publication-item">
                     <div className="item-header">
-                      <h3 
+                      <h3
                         onClick={() => (item.status !== 'deleted' && item.status !== 'cancelled' && item.status !== 'closed') && onNavigate(
-                          item.type === 'activity' ? 'activity-detail' : 'venue-detail', 
+                          item.type === 'activity' ? 'activity-detail' : 'venue-detail',
                           item
                         )}
                         className={`clickable-title ${(item.status === 'deleted' || item.status === 'cancelled' || item.status === 'closed') ? 'deleted-item' : ''}`}
                         title={(item.status === 'deleted' || item.status === 'cancelled' || item.status === 'closed') ? `${item.type === 'activity' ? '活动' : '场馆'}已被删除或关闭` : "点击查看详情"}
                       >
                         {item.title || item.name}
-                        {(item.status === 'deleted' || item.status === 'cancelled' || item.status === 'closed') && 
+                        {(item.status === 'deleted' || item.status === 'cancelled' || item.status === 'closed') &&
                           <span className="deleted-tag">（{item.status === 'deleted' ? '已删除' : item.status === 'cancelled' ? '已解散' : '已关闭'}）</span>
                         }
                       </h3>
                       <div className="publication-info">
                         <span className="publication-type">{item.type === 'activity' ? '活动' : '场馆'}</span>
-                        <span 
+                        <span
                           className="status"
                           style={{ backgroundColor: getStatusColor(item.status) }}
                         >
                           {getStatusText(item.status, item.type)}
                         </span>
                         {(item.status !== 'deleted' && item.status !== 'cancelled' && item.status !== 'closed') && (
-                          <button 
+                          <button
                             onClick={() => onNavigate(
-                              item.type === 'activity' ? 'activity-detail' : 'venue-detail', 
+                              item.type === 'activity' ? 'activity-detail' : 'venue-detail',
                               item
                             )}
                             className="view-detail-btn"
@@ -358,7 +358,7 @@ const History = ({ user, onBack, onNavigate }) => {
                           </div>
                           <div className="item-info">
                             <span className="info-label">开放时间：</span>
-                            <span>{item.availableHours ? 
+                            <span>{item.availableHours ?
                               item.availableHours.map(hour => {
                                 const startHour = hour.split(':')[0];
                                 const endHour = (parseInt(startHour) + 1).toString().padStart(2, '0');

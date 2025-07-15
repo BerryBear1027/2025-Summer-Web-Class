@@ -1,13 +1,13 @@
 import { Provide, Singleton, Inject } from '@midwayjs/core';
-import { 
-  Activity, 
-  Venue, 
-  Booking, 
+import {
+  Activity,
+  Venue,
+  Booking,
   Comment,
-  CreateActivityDto, 
-  CreateVenueDto, 
-  CreateBookingDto, 
-  CreateCommentDto 
+  CreateActivityDto,
+  CreateVenueDto,
+  CreateBookingDto,
+  CreateCommentDto
 } from '../entity/sports.entity';
 import { UserService } from './user.service';
 
@@ -16,7 +16,7 @@ import { UserService } from './user.service';
 export class SportsService {
   @Inject()
   userService: UserService;
-  
+
   private activities: Map<string, Activity> = new Map();
   private venues: Map<string, Venue> = new Map();
   private bookings: Map<string, Booking> = new Map();
@@ -55,7 +55,7 @@ export class SportsService {
         .filter(activity => true) // 不过滤已删除的活动，让前端处理显示逻辑
         .map(async activity => {
           const activityData = activity.toJSON() as any;
-          
+
           // 判断活动是否过期
           const now = new Date();
           if (activity.endTime <= now && activity.status !== 'completed') {
@@ -63,7 +63,7 @@ export class SportsService {
           } else {
             activityData.dynamicStatus = activityData.status;
           }
-          
+
           // 为每个活动添加参与者详细信息
           const participantDetails = await Promise.all(
             activityData.participants.map(async participantId => {
@@ -89,11 +89,11 @@ export class SportsService {
       console.log('SportsService: 活动不存在');
       return null;
     }
-    
+
     const activityData = activity.toJSON() as Activity;
     console.log('SportsService: 原始活动数据:', activityData);
     console.log('SportsService: 参与者ID列表:', activityData.participants);
-    
+
     // 为活动添加参与者详细信息
     const participantDetails = await Promise.all(
       activityData.participants.map(async participantId => {
@@ -108,11 +108,11 @@ export class SportsService {
         return participantDetail;
       })
     );
-    
+
     console.log('SportsService: 所有参与者详情:', participantDetails);
     activityData.participantDetails = participantDetails;
     console.log('SportsService: 最终活动数据:', activityData);
-    
+
     return activityData;
   }
 
@@ -218,7 +218,7 @@ export class SportsService {
   async deleteActivity(activityId: string, userId: string): Promise<{ success: boolean; message: string }> {
     try {
       console.log('deleteActivity 调用 - activityId:', activityId, 'userId:', userId);
-      
+
       const activity = this.activities.get(activityId);
       if (!activity) {
         console.log('活动不存在，activityId:', activityId);
@@ -280,36 +280,36 @@ export class SportsService {
       .filter(venue => true) // 不过滤已删除的场馆，让前端处理显示逻辑
       .map(venue => {
         const venueData = venue.toJSON() as any;
-        
+
         // 判断场馆状态
         const now = new Date();
         const currentHour = now.getHours();
         const today = now.toISOString().split('T')[0];
-        
+
         // 检查是否所有时间段都已过期
         const allTimesExpired = venue.availableHours.every(hour => {
           const slotHour = parseInt(hour.split(':')[0]);
           return slotHour <= currentHour;
         });
-        
+
         // 检查今天是否所有时间段都被预约
         const todayBookings = Array.from(this.bookings.values())
-          .filter(booking => 
-            booking.venueId === venue.id && 
+          .filter(booking =>
+            booking.venueId === venue.id &&
             booking.bookingDate.toISOString().split('T')[0] === today &&
-            booking.status === 'confirmed'
+            (booking.status === 'confirmed' || booking.status === 'pending')
           );
-        
+
         const bookedHours = todayBookings.map(booking => booking.startTime);
         const allTimesBooked = venue.availableHours.every(hour => bookedHours.includes(hour));
-        
+
         // 计算剩余可预约时间段
         const remainingSlots = venue.availableHours.filter(hour => {
           const slotHour = parseInt(hour.split(':')[0]);
           // 时间段没有被预约且还没过期
           return !bookedHours.includes(hour) && slotHour > currentHour;
         }).length;
-        
+
         // 设置动态状态
         if (allTimesExpired) {
           venueData.dynamicStatus = 'expired';
@@ -318,14 +318,14 @@ export class SportsService {
         } else {
           venueData.dynamicStatus = venueData.status;
         }
-        
+
         // 添加剩余时间段信息
         venueData.remainingSlots = remainingSlots;
-        
+
         return venueData;
       })
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-      
+
     return venues;
   }
 
@@ -340,7 +340,7 @@ export class SportsService {
     try {
       console.log('deleteVenue 调用 - venueId:', venueId, 'userId:', userId);
       console.log('当前存储的场馆:', Array.from(this.venues.keys()));
-      
+
       const venue = this.venues.get(venueId);
       if (!venue) {
         console.log('场馆不存在，venueId:', venueId);
@@ -379,11 +379,11 @@ export class SportsService {
       }
 
       let targetDate = date ? new Date(date) : new Date();
-      
+
       // 获取指定日期的所有预约
       const bookings = Array.from(this.bookings.values())
-        .filter(booking => 
-          booking.venueId === venueId && 
+        .filter(booking =>
+          booking.venueId === venueId &&
           booking.bookingDate.toDateString() === targetDate.toDateString() &&
           booking.status !== 'cancelled'
         )
@@ -452,9 +452,9 @@ export class SportsService {
 
       // 检查预约时间是否在场馆可用时间内
       if (!venue.availableHours.includes(bookingData.startTime)) {
-        return { 
-          success: false, 
-          message: `预约开始时间不在场馆可用时间内，可用时间: ${venue.availableHours.join(', ')}` 
+        return {
+          success: false,
+          message: `预约开始时间不在场馆可用时间内，可用时间: ${venue.availableHours.join(', ')}`
         };
       }
 
@@ -468,9 +468,9 @@ export class SportsService {
       // 检查时间冲突
       const bookingDateObj = typeof bookingData.bookingDate === 'string' ? new Date(bookingData.bookingDate) : bookingData.bookingDate;
       const existingBookings = Array.from(this.bookings.values()).filter(
-        booking => booking.venueId === bookingData.venueId && 
-        booking.bookingDate.toDateString() === bookingDateObj.toDateString() &&
-        booking.status !== 'cancelled'
+        booking => booking.venueId === bookingData.venueId &&
+          booking.bookingDate.toDateString() === bookingDateObj.toDateString() &&
+          booking.status !== 'cancelled'
       );
 
       // 检查是否有时间冲突
@@ -479,7 +479,7 @@ export class SportsService {
         const existingEnd = this.timeStringToMinutes(booking.endTime);
         const newStart = this.timeStringToMinutes(bookingData.startTime);
         const newEnd = this.timeStringToMinutes(bookingData.endTime);
-        
+
         return (newStart < existingEnd && newEnd > existingStart);
       });
 
@@ -552,7 +552,7 @@ export class SportsService {
         return bookingData;
       })
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    
+
     return bookings;
   }
 
@@ -623,7 +623,7 @@ export class SportsService {
     const allActivities = await this.getAllActivities();
     if (!keyword) return allActivities;
 
-    return allActivities.filter(activity => 
+    return allActivities.filter(activity =>
       activity.name.toLowerCase().includes(keyword.toLowerCase()) ||
       activity.location.toLowerCase().includes(keyword.toLowerCase()) ||
       (activity.description && activity.description.toLowerCase().includes(keyword.toLowerCase()))
@@ -635,7 +635,7 @@ export class SportsService {
     const allVenues = await this.getAllVenues();
     if (!keyword) return allVenues;
 
-    return allVenues.filter(venue => 
+    return allVenues.filter(venue =>
       venue.name.toLowerCase().includes(keyword.toLowerCase()) ||
       venue.location.toLowerCase().includes(keyword.toLowerCase()) ||
       venue.sportType.toLowerCase().includes(keyword.toLowerCase()) ||

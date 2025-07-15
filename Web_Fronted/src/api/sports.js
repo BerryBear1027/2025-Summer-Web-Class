@@ -4,7 +4,7 @@ import { tokenManager } from './auth';
 // 体育活动相关API
 export const sportsAPI = {
   // ============ 活动相关 ============
-  
+
   // 创建活动
   createActivity: (activityData) => {
     const token = tokenManager.getToken();

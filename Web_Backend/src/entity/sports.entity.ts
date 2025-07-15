@@ -14,7 +14,7 @@ export interface IActivity {
   status: 'recruiting' | 'full' | 'ongoing' | 'completed' | 'cancelled' | 'deleted';
   dynamicStatus?: string; // 动态状态，用于前端显示
   participants: string[]; // 参与者用户ID数组
-  participantDetails?: Array<{id: string; username: string}>; // 参与者详细信息
+  participantDetails?: Array<{ id: string; username: string }>; // 参与者详细信息
   createdAt: Date;
   updatedAt: Date;
 }
@@ -34,7 +34,7 @@ export class Activity implements IActivity {
   status: 'recruiting' | 'full' | 'ongoing' | 'completed' | 'cancelled' | 'deleted';
   dynamicStatus?: string;
   participants: string[];
-  participantDetails?: Array<{id: string; username: string}>;
+  participantDetails?: Array<{ id: string; username: string }>;
   createdAt: Date;
   updatedAt: Date;
 

@@ -173,6 +173,7 @@
 .menu-item:last-child {
   border-radius: 0 0 6px 6px;
 }
+
 .user-avatar {
   width: 32px;
   height: 32px;
@@ -473,8 +474,13 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .empty-state {
@@ -711,7 +717,9 @@
 }
 
 /* 头像样式 - 优化居中和比例 */
-.avatar-placeholder, .avatar-placeholder-large, .avatar-placeholder-sm {
+.avatar-placeholder,
+.avatar-placeholder-large,
+.avatar-placeholder-sm {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -750,7 +758,8 @@
   min-height: 24px;
 }
 
-.user-avatar, .creator-avatar {
+.user-avatar,
+.creator-avatar {
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -836,8 +845,15 @@
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
 }
 
 /* 响应式设计 */
@@ -845,13 +861,13 @@
   .github-sidebar {
     width: 60px;
   }
-  
+
   .github-sidebar .nav-title,
   .github-sidebar .user-info,
   .github-sidebar .logout-button {
     display: none;
   }
-  
+
   .github-sidebar .nav-link span:not(.nav-icon) {
     display: none;
   }
@@ -861,7 +877,7 @@
   .header-center {
     display: none;
   }
-  
+
   .github-sidebar {
     position: fixed;
     left: -260px;
@@ -870,24 +886,24 @@
     z-index: 999;
     transition: left 0.3s ease;
   }
-  
+
   .github-sidebar.show {
     left: 0;
   }
-  
+
   .content-list {
     padding: 16px;
   }
-  
+
   .item-card {
     padding: 16px;
   }
-  
+
   .item-details {
     flex-direction: column;
     gap: 8px;
   }
-  
+
   .item-footer {
     flex-direction: column;
     gap: 12px;

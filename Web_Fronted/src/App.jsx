@@ -76,8 +76,8 @@ function App() {
 
   // 返回上一页
   const goBack = () => {
-    if (currentView === 'profile' || currentView === 'create-activity' || 
-        currentView === 'create-venue' || currentView === 'history') {
+    if (currentView === 'profile' || currentView === 'create-activity' ||
+      currentView === 'create-venue' || currentView === 'history') {
       setCurrentView('dashboard');
     } else if (currentView === 'activity-detail' || currentView === 'venue-detail') {
       setCurrentView('dashboard');
