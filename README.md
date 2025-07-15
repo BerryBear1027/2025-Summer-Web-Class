@@ -11,6 +11,7 @@
 如果有问题还可发送邮件至：BearYH1027@outlook.com
 
 ## 项目启动
+运行前准备：可用的IDE，nodejs环境\
 由于还未上线，只能本地运行，download项目文件之后在当前文件夹执行\
 首先在IDE内打开终端\
 `cd Web_Backend\\进入后端仓库`\
