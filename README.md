@@ -7,15 +7,18 @@
 
 ## 项目启动
 由于还未上线，只能本地运行，download项目文件之后在当前文件夹执行\
-`cd Web_Backend`\
+`cd Web_Backend//进入后端仓库`\
 `npm install`\
 `npm start`\
 `npm run dev`\
 `cd ..`\
-`cd Web_Fronted`\
+`cd Web_Fronted\\进入前端仓库`\
 `npm install`\
 `npm start`\
-`npm run dev`
+`npm run dev`\
+然后进入前端给出的local端口即可进行注册和登陆操作以进入主页面
+
+## 页面展示
 
 
 
