@@ -16,6 +16,7 @@ function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState(null); // 用于存储选中的活动或场馆
+  const [refreshTrigger, setRefreshTrigger] = useState(0); // 用于触发Dashboard刷新
 
   // 检查是否已登录
   useEffect(() => {
@@ -67,6 +68,12 @@ function App() {
     setSelectedItem(item);
   };
 
+  // 处理创建成功后的导航和刷新
+  const handleCreateSuccess = () => {
+    setCurrentView('dashboard');
+    setRefreshTrigger(prev => prev + 1); // 触发Dashboard刷新
+  };
+
   // 返回上一页
   const goBack = () => {
     if (currentView === 'profile' || currentView === 'create-activity' || 
@@ -110,6 +117,7 @@ function App() {
           user={user}
           onNavigate={navigateTo}
           onLogout={handleLogout}
+          refreshTrigger={refreshTrigger}
         />
       )}
 
@@ -144,7 +152,7 @@ function App() {
         <CreateActivity
           user={user}
           onBack={goBack}
-          onSuccess={() => navigateTo('dashboard')}
+          onSuccess={handleCreateSuccess}
         />
       )}
 
@@ -152,7 +160,7 @@ function App() {
         <CreateVenue
           user={user}
           onBack={goBack}
-          onSuccess={() => navigateTo('dashboard')}
+          onSuccess={handleCreateSuccess}
         />
       )}
 

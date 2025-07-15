@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { sportsAPI } from '../api/sports';
 import './Dashboard.css';
 
-const Dashboard = ({ user, onNavigate, onLogout }) => {
+const Dashboard = ({ user, onNavigate, onLogout, refreshTrigger }) => {
   const [activities, setActivities] = useState([]);
   const [venues, setVenues] = useState([]);
   const [searchKeyword, setSearchKeyword] = useState('');
@@ -14,7 +14,7 @@ const Dashboard = ({ user, onNavigate, onLogout }) => {
 
   useEffect(() => {
     loadData();
-  }, []); // 确保只在组件挂载时执行一次
+  }, [refreshTrigger]); // 当refreshTrigger变化时重新加载数据
 
   const loadData = async () => {
     setLoading(true);
@@ -28,24 +28,13 @@ const Dashboard = ({ user, onNavigate, onLogout }) => {
       console.log('Activities response:', activitiesRes);
       console.log('Venues response:', venuesRes);
 
-      // 添加更详细的日志
-      if (activitiesRes && activitiesRes.data) {
-        console.log('Activities data:', activitiesRes.data);
-        console.log('Activities count:', activitiesRes.data.length);
-        if (activitiesRes.data.length > 0) {
-          console.log('First activity:', activitiesRes.data[0]);
-        }
-      }
-
       if (activitiesRes.success) {
         setActivities(activitiesRes.data || []);
-        console.log('Set activities:', activitiesRes.data || []);
       } else {
         console.log('Activities request failed:', activitiesRes);
       }
       if (venuesRes.success) {
         setVenues(venuesRes.data || []);
-        console.log('Set venues:', venuesRes.data || []);
       } else {
         console.log('Venues request failed:', venuesRes);
       }
@@ -297,28 +286,41 @@ const Dashboard = ({ user, onNavigate, onLogout }) => {
                     </button>
                   </div>
                 ) : (
-                  activities.map((activity) => (
-                    <div key={activity.id} className="item-card activity-card" onClick={() => {
-                      console.log('Clicking activity:', activity);
-                      onNavigate('activity-detail', activity);
-                    }}>
-                      <div className="card-content">
-                        <div className="item-header">
-                          <div className="item-title">
-                            <h3>{activity.name}</h3>
-                            <span className="item-type">{activity.type || '活动'}</span>
-                          </div>
+                  activities.map((activity) => {
+                    const displayStatus = activity.dynamicStatus || activity.status;
+                    const isExpired = displayStatus === 'expired';
+                    const isDeleted = activity.status === 'deleted';
+                    const isCancelled = activity.status === 'cancelled';
+                    const isNonInteractive = isExpired || isDeleted || isCancelled;
+                    
+                    return (
+                      <div key={activity.id} className={`item-card activity-card ${isExpired ? 'expired-card' : ''} ${isDeleted ? 'deleted-card' : ''} ${isCancelled ? 'cancelled-card' : ''}`} onClick={() => {
+                        if (!isNonInteractive) {
+                          console.log('Clicking activity:', activity);
+                          onNavigate('activity-detail', activity);
+                        }
+                      }}>
+                        <div className="card-content">
+                          <div className="item-header">
+                            <div className="item-title">
+                              <h3 style={{ cursor: isNonInteractive ? 'not-allowed' : 'pointer' }}>{activity.name}</h3>
+                              <span className="item-type">{activity.type || '活动'}</span>
+                            </div>
                           <div className="item-meta">
-                            <span className={`status-badge status-${activity.status}`}>
-                              {activity.status === 'recruiting' ? '招募中' : 
-                               activity.status === 'full' ? '已满员' :
-                               activity.status === 'ongoing' ? '进行中' :
-                               activity.status === 'completed' ? '已结束' :
-                               activity.status === 'cancelled' ? '已取消' : activity.status}
+                            <span className={`status-badge status-${displayStatus}`}>
+                              {displayStatus === 'recruiting' ? '招募中' : 
+                               displayStatus === 'full' ? '已满员' :
+                               displayStatus === 'ongoing' ? '进行中' :
+                               displayStatus === 'completed' ? '已结束' :
+                               displayStatus === 'cancelled' ? '已解散' :
+                               displayStatus === 'deleted' ? '已删除' :
+                               displayStatus === 'expired' ? '已过期' : displayStatus}
                             </span>
-                            <span className="participants-count">
-                              {activity.participants?.length || 0}/{activity.maxParticipants}人
-                            </span>
+                            {!isDeleted && !isCancelled && (
+                              <span className="participants-count">
+                                {activity.participants?.length || 0}/{activity.maxParticipants}人
+                              </span>
+                            )}
                           </div>
                         </div>
                         
@@ -354,7 +356,8 @@ const Dashboard = ({ user, onNavigate, onLogout }) => {
                         </div>
                       </div>
                     </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
             ) : (
@@ -372,22 +375,42 @@ const Dashboard = ({ user, onNavigate, onLogout }) => {
                     </button>
                   </div>
                 ) : (
-                  venues.map((venue) => (
-                    <div key={venue.id} className="item-card venue-card" onClick={() => onNavigate('venue-detail', venue)}>
-                      <div className="card-content">
-                        <div className="item-header">
-                          <div className="item-title">
-                            <h3>{venue.name}</h3>
-                            <span className="item-type">{venue.type}</span>
+                  venues.map((venue) => {
+                    const displayStatus = venue.dynamicStatus || venue.status;
+                    const isExpired = displayStatus === 'expired';
+                    const isFullyBooked = displayStatus === 'fully_booked';
+                    const isDeleted = venue.status === 'deleted';
+                    const isClosed = venue.status === 'closed';
+                    const isNonInteractive = isExpired || isDeleted || isClosed;
+                    
+                    return (
+                      <div key={venue.id} className={`item-card venue-card ${isExpired ? 'expired-card' : ''} ${isFullyBooked ? 'fully-booked-card' : ''} ${isDeleted ? 'deleted-card' : ''} ${isClosed ? 'closed-card' : ''}`} onClick={() => {
+                        if (!isNonInteractive) {
+                          onNavigate('venue-detail', venue);
+                        }
+                      }}>
+                        <div className="card-content">
+                          <div className="item-header">
+                            <div className="item-title">
+                              <h3 style={{ cursor: isNonInteractive ? 'not-allowed' : 'pointer' }}>{venue.name}</h3>
+                              <span className="item-type">{venue.type}</span>
+                            </div>
+                            <div className="item-meta">
+                              <span className={`status-badge status-${displayStatus}`}>
+                                {displayStatus === 'available' ? '可用' :
+                                 displayStatus === 'maintenance' ? '维护中' :
+                                 displayStatus === 'closed' ? '已关闭' :
+                                 displayStatus === 'deleted' ? '已删除' :
+                                 displayStatus === 'expired' ? '已过期' :
+                                 displayStatus === 'fully_booked' ? '已满约' : displayStatus}
+                              </span>
+                              {!isDeleted && !isClosed && (
+                                <span className={`remaining-slots ${(venue.remainingSlots || 0) === 0 ? 'no-slots' : ''}`}>
+                                  剩余{venue.remainingSlots || 0}个时间段
+                                </span>
+                              )}
+                            </div>
                           </div>
-                          <div className="item-meta">
-                            <span className={`status-badge status-${venue.status}`}>
-                              {venue.status === 'available' ? '可用' :
-                               venue.status === 'maintenance' ? '维护中' :
-                               venue.status === 'closed' ? '关闭' : venue.status}
-                            </span>
-                          </div>
-                        </div>
                         
                         <div className="item-description">
                           {venue.description}
@@ -443,7 +466,8 @@ const Dashboard = ({ user, onNavigate, onLogout }) => {
                         </div>
                       </div>
                     </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
             )}

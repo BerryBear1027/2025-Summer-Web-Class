@@ -12,6 +12,7 @@ export interface IActivity {
   publisherId: string;
   publisherName: string;
   status: 'recruiting' | 'full' | 'ongoing' | 'completed' | 'cancelled' | 'deleted';
+  dynamicStatus?: string; // 动态状态，用于前端显示
   participants: string[]; // 参与者用户ID数组
   participantDetails?: Array<{id: string; username: string}>; // 参与者详细信息
   createdAt: Date;
@@ -31,6 +32,7 @@ export class Activity implements IActivity {
   publisherId: string;
   publisherName: string;
   status: 'recruiting' | 'full' | 'ongoing' | 'completed' | 'cancelled' | 'deleted';
+  dynamicStatus?: string;
   participants: string[];
   participantDetails?: Array<{id: string; username: string}>;
   createdAt: Date;
@@ -72,6 +74,7 @@ export class Activity implements IActivity {
       publisherId: this.publisherId,
       publisherName: this.publisherName,
       status: this.status,
+      dynamicStatus: this.dynamicStatus,
       participants: this.participants,
       participantDetails: this.participantDetails,
       createdAt: this.createdAt,
@@ -94,6 +97,7 @@ export interface IVenue {
   publisherId: string;
   publisherName: string;
   status: 'available' | 'maintenance' | 'closed' | 'deleted';
+  dynamicStatus?: string; // 动态状态，用于前端显示
   bookings: string[]; // 预约记录ID数组
   createdAt: Date;
   updatedAt: Date;
@@ -112,6 +116,7 @@ export class Venue implements IVenue {
   publisherId: string;
   publisherName: string;
   status: 'available' | 'maintenance' | 'closed' | 'deleted';
+  dynamicStatus?: string;
   bookings: string[];
   createdAt: Date;
   updatedAt: Date;
@@ -152,6 +157,7 @@ export class Venue implements IVenue {
       publisherId: this.publisherId,
       publisherName: this.publisherName,
       status: this.status,
+      dynamicStatus: this.dynamicStatus,
       bookings: this.bookings,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
@@ -195,7 +201,7 @@ export class Booking implements IBooking {
     this.venueName = data.venueName || '';
     this.userId = data.userId || '';
     this.userName = data.userName || '';
-    this.bookingDate = data.bookingDate || new Date();
+    this.bookingDate = data.bookingDate ? (typeof data.bookingDate === 'string' ? new Date(data.bookingDate) : data.bookingDate) : new Date();
     this.startTime = data.startTime || '09:00';
     this.endTime = data.endTime || '10:00';
     this.status = data.status || 'pending';

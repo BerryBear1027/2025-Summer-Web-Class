@@ -104,6 +104,51 @@
   color: white;
 }
 
+/* 过期和满约状态样式 */
+.expired-card {
+  opacity: 0.7;
+  border: 2px dashed #ef4444;
+}
+
+.fully-booked-card {
+  border: 2px solid #f59e0b;
+}
+
+.expired-notice {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  color: #dc2626;
+  padding: 1rem;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.action-btn.disabled {
+  background: #d1d5db !important;
+  color: #6b7280 !important;
+  cursor: not-allowed !important;
+  opacity: 0.6;
+}
+
+.action-btn.disabled:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* 状态徽章样式 */
+.status-expired {
+  background-color: #ef4444 !important;
+}
+
+.status-fully_booked {
+  background-color: #f59e0b !important;
+}
+
+.expired-title {
+  color: #6b7280 !important;
+  text-decoration: line-through;
+}
+
 .venue-info {
   margin-bottom: 2rem;
 }

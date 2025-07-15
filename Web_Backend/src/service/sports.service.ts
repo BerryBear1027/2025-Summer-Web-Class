@@ -52,9 +52,18 @@ export class SportsService {
   async getAllActivities(): Promise<Activity[]> {
     const activities = await Promise.all(
       Array.from(this.activities.values())
-        .filter(activity => activity.status !== 'deleted') // 过滤已删除的活动
+        .filter(activity => true) // 不过滤已删除的活动，让前端处理显示逻辑
         .map(async activity => {
-          const activityData = activity.toJSON() as Activity;
+          const activityData = activity.toJSON() as any;
+          
+          // 判断活动是否过期
+          const now = new Date();
+          if (activity.endTime <= now && activity.status !== 'completed') {
+            activityData.dynamicStatus = 'expired';
+          } else {
+            activityData.dynamicStatus = activityData.status;
+          }
+          
           // 为每个活动添加参与者详细信息
           const participantDetails = await Promise.all(
             activityData.participants.map(async participantId => {
@@ -267,10 +276,57 @@ export class SportsService {
 
   // 获取所有场馆
   async getAllVenues(): Promise<Venue[]> {
-    return Array.from(this.venues.values())
-      .filter(venue => venue.status !== 'deleted') // 过滤已删除的场馆
-      .map(venue => venue.toJSON() as Venue)
+    const venues = Array.from(this.venues.values())
+      .filter(venue => true) // 不过滤已删除的场馆，让前端处理显示逻辑
+      .map(venue => {
+        const venueData = venue.toJSON() as any;
+        
+        // 判断场馆状态
+        const now = new Date();
+        const currentHour = now.getHours();
+        const today = now.toISOString().split('T')[0];
+        
+        // 检查是否所有时间段都已过期
+        const allTimesExpired = venue.availableHours.every(hour => {
+          const slotHour = parseInt(hour.split(':')[0]);
+          return slotHour <= currentHour;
+        });
+        
+        // 检查今天是否所有时间段都被预约
+        const todayBookings = Array.from(this.bookings.values())
+          .filter(booking => 
+            booking.venueId === venue.id && 
+            booking.bookingDate.toISOString().split('T')[0] === today &&
+            booking.status === 'confirmed'
+          );
+        
+        const bookedHours = todayBookings.map(booking => booking.startTime);
+        const allTimesBooked = venue.availableHours.every(hour => bookedHours.includes(hour));
+        
+        // 计算剩余可预约时间段
+        const remainingSlots = venue.availableHours.filter(hour => {
+          const slotHour = parseInt(hour.split(':')[0]);
+          // 时间段没有被预约且还没过期
+          return !bookedHours.includes(hour) && slotHour > currentHour;
+        }).length;
+        
+        // 设置动态状态
+        if (allTimesExpired) {
+          venueData.dynamicStatus = 'expired';
+        } else if (allTimesBooked) {
+          venueData.dynamicStatus = 'fully_booked';
+        } else {
+          venueData.dynamicStatus = venueData.status;
+        }
+        
+        // 添加剩余时间段信息
+        venueData.remainingSlots = remainingSlots;
+        
+        return venueData;
+      })
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      
+    return venues;
   }
 
   // 根据ID获取场馆
@@ -410,9 +466,10 @@ export class SportsService {
       }
 
       // 检查时间冲突
+      const bookingDateObj = typeof bookingData.bookingDate === 'string' ? new Date(bookingData.bookingDate) : bookingData.bookingDate;
       const existingBookings = Array.from(this.bookings.values()).filter(
         booking => booking.venueId === bookingData.venueId && 
-        booking.bookingDate.toDateString() === bookingData.bookingDate.toDateString() &&
+        booking.bookingDate.toDateString() === bookingDateObj.toDateString() &&
         booking.status !== 'cancelled'
       );
 
@@ -591,7 +648,7 @@ export class SportsService {
   // 获取用户参与的活动
   async getUserActivities(userId: string): Promise<Activity[]> {
     return Array.from(this.activities.values())
-      .filter(activity => activity.participants.includes(userId) || activity.publisherId === userId)
+      .filter(activity => activity.participants.includes(userId))
       .map(activity => activity.toJSON() as Activity)
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }

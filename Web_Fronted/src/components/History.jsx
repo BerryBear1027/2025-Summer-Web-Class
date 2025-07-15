@@ -95,13 +95,13 @@ const History = ({ user, onBack, onNavigate }) => {
       case 'full': return '已满员';
       case 'ongoing': return '进行中';
       case 'completed': return '已结束';
-      case 'cancelled': return '已取消';
+      case 'cancelled': return '已解散';
       case 'deleted': return '已删除';
       case 'available': return '可用';
       case 'maintenance': return '维护中';
       case 'closed': return '已关闭';
       case 'pending': return '待确认';
-      case 'confirmed': return '已确认';
+      case 'confirmed': return '预约成功';
       case 'active': return '活跃';
       default: return status || '未知状态';
     }
@@ -159,12 +159,12 @@ const History = ({ user, onBack, onNavigate }) => {
                   <div key={activity.id} className="history-item activity-item">
                     <div className="item-header">
                       <h3 
-                        onClick={() => activity.status !== 'deleted' && onNavigate('activity-detail', activity)}
-                        className={`clickable-title ${activity.status === 'deleted' ? 'deleted-item' : ''}`}
-                        title={activity.status === 'deleted' ? '活动已被删除' : "点击查看活动详情"}
+                        onClick={() => (activity.status !== 'deleted' && activity.status !== 'cancelled') && onNavigate('activity-detail', activity)}
+                        className={`clickable-title ${(activity.status === 'deleted' || activity.status === 'cancelled') ? 'deleted-item' : ''}`}
+                        title={(activity.status === 'deleted' || activity.status === 'cancelled') ? '活动已被删除或解散' : "点击查看活动详情"}
                       >
                         {activity.name}
-                        {activity.status === 'deleted' && <span className="deleted-tag">（已删除）</span>}
+                        {(activity.status === 'deleted' || activity.status === 'cancelled') && <span className="deleted-tag">（{activity.status === 'deleted' ? '已删除' : '已解散'}）</span>}
                       </h3>
                       <div className="item-actions">
                         <span 
@@ -173,7 +173,7 @@ const History = ({ user, onBack, onNavigate }) => {
                         >
                           {getStatusText(activity.status)}
                         </span>
-                        {activity.status !== 'deleted' && (
+                        {(activity.status !== 'deleted' && activity.status !== 'cancelled') && (
                           <button 
                             onClick={() => onNavigate('activity-detail', activity)}
                             className="view-detail-btn"
@@ -238,7 +238,7 @@ const History = ({ user, onBack, onNavigate }) => {
                         >
                           {getStatusText(booking.status)}
                         </span>
-                        {booking.status === 'confirmed' && (
+                        {(booking.status === 'confirmed' || booking.status === 'pending') && (
                           <button 
                             onClick={() => handleCancelBooking(booking.id)}
                             className="cancel-booking-btn"
@@ -293,15 +293,17 @@ const History = ({ user, onBack, onNavigate }) => {
                   <div key={`${item.type}-${item.id}`} className="history-item publication-item">
                     <div className="item-header">
                       <h3 
-                        onClick={() => item.status !== 'deleted' && onNavigate(
+                        onClick={() => (item.status !== 'deleted' && item.status !== 'cancelled' && item.status !== 'closed') && onNavigate(
                           item.type === 'activity' ? 'activity-detail' : 'venue-detail', 
                           item
                         )}
-                        className={`clickable-title ${item.status === 'deleted' ? 'deleted-item' : ''}`}
-                        title={item.status === 'deleted' ? `${item.type === 'activity' ? '活动' : '场馆'}已被删除` : "点击查看详情"}
+                        className={`clickable-title ${(item.status === 'deleted' || item.status === 'cancelled' || item.status === 'closed') ? 'deleted-item' : ''}`}
+                        title={(item.status === 'deleted' || item.status === 'cancelled' || item.status === 'closed') ? `${item.type === 'activity' ? '活动' : '场馆'}已被删除或关闭` : "点击查看详情"}
                       >
                         {item.title || item.name}
-                        {item.status === 'deleted' && <span className="deleted-tag">（已删除）</span>}
+                        {(item.status === 'deleted' || item.status === 'cancelled' || item.status === 'closed') && 
+                          <span className="deleted-tag">（{item.status === 'deleted' ? '已删除' : item.status === 'cancelled' ? '已解散' : '已关闭'}）</span>
+                        }
                       </h3>
                       <div className="publication-info">
                         <span className="publication-type">{item.type === 'activity' ? '活动' : '场馆'}</span>
@@ -311,7 +313,7 @@ const History = ({ user, onBack, onNavigate }) => {
                         >
                           {getStatusText(item.status, item.type)}
                         </span>
-                        {item.status !== 'deleted' && (
+                        {(item.status !== 'deleted' && item.status !== 'cancelled' && item.status !== 'closed') && (
                           <button 
                             onClick={() => onNavigate(
                               item.type === 'activity' ? 'activity-detail' : 'venue-detail', 

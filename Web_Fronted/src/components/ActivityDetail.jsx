@@ -41,9 +41,9 @@ const ActivityDetail = ({ activity, user, onBack, onNavigate }) => {
       console.log('开始加载活动详情，ID:', activity.id);
       const response = await sportsAPI.getActivityById(activity.id);
       console.log('Load activity details response:', response);
-      // 检查响应结构，可能是 response.data.success 或 response.success
-      const success = response.data?.success || response.success;
-      const data = response.data?.data || response.data;
+      // 检查响应结构
+      const success = response.success;
+      const data = response.data;
       
       if (success && data) {
         console.log('Activity details data:', data);
@@ -67,8 +67,8 @@ const ActivityDetail = ({ activity, user, onBack, onNavigate }) => {
       const response = await sportsAPI.getComments(activityData.id, 'activity');
       console.log('Load comments response:', response); // 添加调试日志
       // 检查响应结构
-      const success = response.data?.success || response.success;
-      const data = response.data?.data || response.data;
+      const success = response.success;
+      const data = response.data;
       
       if (success) {
         setComments(data || []);
