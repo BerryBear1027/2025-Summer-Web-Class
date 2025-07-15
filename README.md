@@ -18,6 +18,31 @@
 然后进入前端给出的local端口即可进行注册和登陆操作以进入主页面
 
 ## 页面展示
+注册/登录界面\
+<img width="2560" height="1600" alt="image" src="https://github.com/user-attachments/assets/c335995a-e015-49d3-a051-976052e196bb" />
+<img width="2560" height="1600" alt="image" src="https://github.com/user-attachments/assets/23a151a9-f9ac-46b8-957f-2a8bf800916e" />
+主页面
+<img width="2560" height="1600" alt="image" src="https://github.com/user-attachments/assets/028b67e1-e408-4c1c-9cee-51b13104f9e6" />
+发布活动
+<img width="2560" height="1600" alt="image" src="https://github.com/user-attachments/assets/fb3e479f-13e8-48ba-82b3-29dc6a2b3dc0" />
+主页面更新
+<img width="2560" height="1600" alt="image" src="https://github.com/user-attachments/assets/4fc8562c-dc96-4997-820f-8ae60a443923" />
+活动详情
+<img width="2560" height="1600" alt="image" src="https://github.com/user-attachments/assets/af1c45da-d0e0-4267-82c7-b263cab71b18" />
+发布场馆
+<img width="2560" height="1600" alt="image" src="https://github.com/user-attachments/assets/1dab7ef3-0a3a-473d-9081-d5c731a9827a" />
+<img width="2560" height="1600" alt="image" src="https://github.com/user-attachments/assets/521aa880-0dd8-48f5-9f48-22f0db170bfa" />
+主页更新
+<img width="2560" height="1600" alt="image" src="https://github.com/user-attachments/assets/5c5cecf6-bac8-40bb-b818-1f57e6e0abc7" />
+场馆详情
+<img width="2560" height="1600" alt="image" src="https://github.com/user-attachments/assets/eab26d8e-4a7b-4144-a4ad-88af71baf760" />
+
+其他功能不一一赘述，请自行探索
+
+
+
+
+
 
 
 
